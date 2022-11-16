@@ -1,4 +1,7 @@
 # Ben50
+
+[![hackmd-github-sync-badge](https://hackmd.io/SwOBsaHwSUudw88f4j6Gcg/badge)](https://hackmd.io/SwOBsaHwSUudw88f4j6Gcg)
+
 [toc]
 ## Files
 [Data](https://docs.google.com/spreadsheets/d/13RTeK4egkz6FViiz9N7Fk00RdI7nglp9wyD4X0nNXjU/edit#gid=0)
