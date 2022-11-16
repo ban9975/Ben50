@@ -1,7 +1,7 @@
 # Ben50
 ## Files
 [Data](https://docs.google.com/spreadsheets/d/13RTeK4egkz6FViiz9N7Fk00RdI7nglp9wyD4X0nNXjU/edit#gid=0) //
-[Code](https://)
+[Code](https://github.com/ban9975/Ben50)
 ## Work Log
 ### 11/1 Meeting
 #### 11/3
