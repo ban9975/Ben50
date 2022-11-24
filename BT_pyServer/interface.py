@@ -16,5 +16,8 @@ class interface:
         return self.ser.SerialReadInt()
 
     def end_process(self):
-        self.ser.SerialWrite('e')
+        self.ser.SerialWrite(str(255))
         self.ser.disconnect()
+
+    def write(self, input):
+        return self.ser.SerialWrite(input)

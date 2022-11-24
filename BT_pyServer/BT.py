@@ -14,8 +14,9 @@ class bluetooth:
             self.ser = serial.Serial(port,38400,timeout=2)
             print("connect success")
             print("")
-        except serial.serialutil.SerialException:
+        except serial.serialutil.SerialException as ex:
             print("fail to connect")
+            print(ex)
             print("")
             return False
         return True
@@ -26,7 +27,10 @@ class bluetooth:
 
     def SerialWrite(self,output):
         # send = 's'.encode("utf-8")
-        send = output.encode("utf-8")
+        if output.isdigit():
+            send = int(output).to_bytes(1, 'little')
+        else:
+            send = output.encode("utf-8")
         self.ser.write(send)
 
     def SerialReadInt(self):
