@@ -19,7 +19,7 @@ def main():
                 t = interf.read()
                 btIn = float(interf.read())
                 # print(100 * btIn / (1023 - btIn), end = ' ')
-                # print(btIn)
+                # print(j, btIn)
                 # print(t, 100 * btIn / (1023 - btIn))
                 avg += btIn
             avg /= 40
