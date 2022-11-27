@@ -24,7 +24,11 @@ def main():
                 avg += btIn
             avg /= 40
             print(i + 1, 100 * avg / (1023 - avg))
-        iter = int(input("Please input the number of iteration: "))
+        strIn = input("Please input the number of iteration (default = 5): ")
+        if not strIn.isdigit():
+            iter = 5
+        else:
+            iter = int(strIn)
 
     interf.end_process()
 
