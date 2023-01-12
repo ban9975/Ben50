@@ -18,29 +18,31 @@ void BTPrint(unsigned int);
 void loop() {
   if(BTSerial.available()) {
     btRead = BTSerial.read();
-    Serial.print("brRead:");
-    Serial.println(btRead);
+//    Serial.print("brRead:");
+//    Serial.println(btRead);
     if(!start) {
       start = true;
-      Serial.println("start");
+//      Serial.println("start");
     }
     else if(btRead == 255) {
-      Serial.println("end");
+//      Serial.println("end");
       while(1){}
     }
     else {
       for(byte j = 0; j < btRead; ++j) {
         sTime = millis();
-        for(byte i = 0; i < 40; ++i) {
+        for(byte i = 0; i < 20; ++i) {
           cTime = millis();
           anaIn = analogRead(A0);
-          Serial.println(anaIn);
-          BTPrint(cTime - sTime);
+//          Serial.print(float(anaIn) * 5 / 1023);
+//          Serial.print(' ');
+//          Serial.println(anaIn);
+//          BTPrint(cTime - sTime);
           BTPrint(anaIn);
-          delay(40);
+          delay(30);
         }
       }
-      delay(1000);
+      delay(3000);
     }
   }
 }

@@ -8,15 +8,14 @@ class interface:
         print("Arduino Bluetooth Connect Program.")
         print("")
         self.ser = BT.bluetooth()
-        while(not self.ser.do_connect("COM6")):
-            self.ser.do_connect("COM6")
-        self.ser.SerialWrite('s');  
+        while(not self.ser.do_connect("COM5")):
+            self.ser.do_connect("COM5")
+        self.write('0')
 
     def read(self):
         return self.ser.SerialReadInt()
 
     def end_process(self):
-        self.ser.SerialWrite(str(255))
         self.ser.disconnect()
 
     def write(self, input):

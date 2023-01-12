@@ -40,7 +40,7 @@ class bluetooth:
             rv = self.ser.read(2)
             rv=int.from_bytes(rv, byteorder='big', signed=False)
             return rv
-        return ""
+        return
 
     def SerialReadByte(self):
         sleep(0.005)
