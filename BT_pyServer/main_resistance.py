@@ -20,12 +20,9 @@ def main():
                 btIn = float(interf.read())
                 while btIn == 0:
                     btIn = float(interf.read())
-                # print(100 * btIn / (1023 - btIn), end = ' ')
-                # print(j, btIn)
-                # print(t, 100 * btIn / (1023 - btIn))
-                avg += btIn
+                avg += btIn * 3
             avg /= 20
-            print(i + 1, 100 * avg / (1023 - avg))
+            print(i + 1, 100 * avg / (5000 - avg))
         strIn = input("Please input the number of iteration (default = 1): ")
         if not strIn.isdigit():
             iter = 1

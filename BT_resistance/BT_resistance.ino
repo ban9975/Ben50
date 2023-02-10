@@ -1,16 +1,19 @@
 #include <SoftwareSerial.h>
+#include <Wire.h>
+#include <Adafruit_ADS1X15.h>
 
 SoftwareSerial BTSerial(10,11);
+Adafruit_ADS1015 ads;
+const float multiplier = 3.0F;
 bool start = false;
 byte btRead;
-//byte iter;
-unsigned int sTime;
-unsigned int cTime;
 unsigned int anaIn;
+int16_t adc0;
 
 void setup() {
   BTSerial.begin(38400);
   Serial.begin(9600);
+  ads.begin();
 }
 
 void BTPrint(unsigned int);
@@ -30,15 +33,10 @@ void loop() {
     }
     else {
       for(byte j = 0; j < btRead; ++j) {
-        sTime = millis();
         for(byte i = 0; i < 20; ++i) {
-          cTime = millis();
-          anaIn = analogRead(A0);
-//          Serial.print(float(anaIn) * 5 / 1023);
-//          Serial.print(' ');
-//          Serial.println(anaIn);
-//          BTPrint(cTime - sTime);
-          BTPrint(anaIn);
+          adc0 = ads.readADC_SingleEnded(0);
+          Serial.println(adc0 * 300.0F / (5000-adc0));
+          BTPrint(adc0);
           delay(30);
         }
       }
