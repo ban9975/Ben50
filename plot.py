@@ -25,18 +25,20 @@ while(True):
     sigma = [0] * len(rows)
     for i in range(len(rows)):
         # axis_x[i] = xls[xls.columns[1]][rows[i]] * _length
-        axis_x[i] = xls[xls.columns[1]][rows[i]]
+        axis_x[i] = xls[xls.columns[0]][rows[i]]
         for j in range(_sets):
             for k in range(_reps):
                 # print(xls[xls.columns[1 + (_reps+1) * j + k]][rows[i]], end = ' ')
-                data[j][i] += xls[xls.columns[3 + (_reps+1) * j + k]][rows[i]]
+                data[j][i] += xls[xls.columns[1 + _reps * j + k]][rows[i]]
             data[j][i] /= _reps
             mean[i] += data[j][i]
             sigma[i] += data[j][i] ** 2
+            print(sigma[i])
         mean[i] /= _sets
         sigma[i] = math.sqrt((sigma[i] / _sets) - mean[i] ** 2)
-        # print('mean[{}] = {}'. format(i, mean[i]))
-        # print('sigma[{}] = {}'. format(i, sigma[i]))
+        print('mean[{}] = {}'. format(i, mean[i]))
+        print('sigma[{}] = {}'. format(i, sigma[i]))
+        print()
 
     # # x: reps
     # data = [[0] * _reps for i in range(len(rows))]
@@ -60,7 +62,7 @@ while(True):
     # plt.xlabel('Angle (deg)')
     plt.grid(True)
     plt.savefig('fig/{}.png'.format(plotName))
-    # plt.show()
+    plt.show()
     plt.close()
 
     # mean and standard deviation

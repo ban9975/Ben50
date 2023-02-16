@@ -24,7 +24,10 @@ def main():
     for i in range(len(title)):
         worksheet.cell(row=1, column=i+1, value=title[i])
     row = 2
-
+    stretch = [425, 367, 400, 421]
+    gnd = [355, 377, 363, 386]
+    off = [s-g for s,g in zip(stretch,gnd)]
+    print(off)
     while True:
         _input = input("input: ")
         if _input == 'b':
@@ -40,6 +43,7 @@ def main():
             interf.write(str(1))
             worksheet.cell(row=row, column=1, value=int(_input))
             worksheet.cell(row=row, column=2, value=str(datetime.now()-start))
+
             avg = [0, 0, 0, 0]
             for j in range(20):
                 for k in range(4):
@@ -54,7 +58,7 @@ def main():
             print(row-1, end='\t')
             for k in range(4):
                 avg[k] /= 20
-                res = 300 * avg[k] / (5000 - avg[k] * 3)
+                res = 300 * avg[k] / (5000 - avg[k] * 3) - off[k]
                 print(round(res, 2), end='\t')
                 worksheet.cell(row=row, column=k+4, value=round(res, 2))
             print()

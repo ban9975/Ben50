@@ -16,19 +16,20 @@ def main():
                     while btIn == 0:
                         print(0)
                         btIn = float(interf.read())
-                    avg[k] += btIn * 3
+                    avg[k] += btIn
             for k in range(4):
                 avg[k] /= 20
-                res = 100 * avg[k] / (5000 - avg[k])
+                res = 100 * avg[k] * 3 / (5000 - avg[k] * 3)
                 print(round(res, 2), end='\t')
             print()
         strIn = input("Please input the number of iteration (default = 1): ")
-        if not strIn.isdigit():
+        if strIn == 'e':
+            interf.end_process()
+            break
+        elif not strIn.isdigit():
             iter = 1
         else:
             iter = int(strIn)
-
-    interf.end_process()
 
 
 if __name__ == '__main__':

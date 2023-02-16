@@ -65,7 +65,7 @@ end_ = [6, 16, 30, 48, 70];
 xx = [];
 yy = [];
 zz = [];
-for i = 1: 5
+for i = 1: 3
     len = res(start_(i), 1);
     for j = start_(i):end_(i)
         for k = 2:11
@@ -76,7 +76,10 @@ for i = 1: 5
     end
 end
 
+format long
 [sf, gof] = fit([xx, yy], zz, 'poly23');
+names = coeffvalues(sf)
+
 p = plot(sf);
 alpha(p, 0.3);
 hold on;

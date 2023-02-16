@@ -32,9 +32,9 @@ void loop() {
         for(byte i = 0; i < 20; ++i) {
           for(byte k = 0; k < 4; ++k) {
             adc[k] = ads.readADC_SingleEnded(k);
-            while(adc[k] >= 1400) {
-              adc[k] = ads.readADC_SingleEnded(k);
-            }
+//            while(adc[k] >= 1400) {
+//              adc[k] = ads.readADC_SingleEnded(k);
+//            }
             BTPrint(adc[k]);
             Serial.print(float(adc[k])*300/(5000-float(adc[k])*3));
             Serial.print(' ');
