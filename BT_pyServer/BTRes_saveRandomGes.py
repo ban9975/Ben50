@@ -7,12 +7,12 @@ from datetime import datetime
 interf = interface.interface()
 
 def main():
-    fileName = 'wristband/v4/adi_res_test.xlsx'
+    fileName = 'wristband/v4/ban_res_test.xlsx'
     gestures = ['down', 'up', 'thumb', 'little finger', 'stretch', 'fist', 'rest']
     workbook = load_workbook(fileName)
     start = datetime.now()
     mode = int(input("0: calibration, 1: random: "))
-    stretch = [285.33, 275.42, 336.76, 244.03]
+    stretch = [250.26, 310.72, 339.25, 329.09]
     gnd = [355, 377, 363, 386]
     off = [s-g for s,g in zip(stretch,gnd)]
     print(off)

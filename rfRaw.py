@@ -1,25 +1,15 @@
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn import metrics
 
-import importData
-
-train = importData.importData('wristband/v4/adi_res_0216.xlsx')
-test = importData.importData('wristband/v4/adi_res_test_0216.xlsx')
-
-# train.res2len()
-# test.res2len()
+import importDataRaw
+mode = 1
+train = importDataRaw.importData('wristband/rawT.xlsx',mode)
+test = importDataRaw.importData('wristband/rawTTest.xlsx',mode)
 
 x_train, x_test, y_train, y_test = train_test_split(train.features,train.labels,train_size=0.7, random_state=9999)
 # rf
 model = RandomForestClassifier(n_estimators=200, max_depth=5, random_state=9999)
-# knn
-# model = KNeighborsClassifier()
-# naive bayes
-# model = GaussianNB()
-# svm
-# model = SVC()
 model.fit(x_train, y_train)
 
 predictions = model.predict(x_test)
