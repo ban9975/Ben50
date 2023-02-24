@@ -4,20 +4,21 @@ import interface
 interf = interface.interface()
 
 def main():
+    nSensor = 8
     row = 1
     iter = int(input("Please input the number of iterations: "))
     while iter != 0:
         interf.write(str(iter))
         for i in range(iter):
-            avg = [0, 0, 0, 0]
+            avg = [0, 0, 0, 0, 0, 0, 0, 0]
             for j in range(20):
-                for k in range(4):
+                for k in range(nSensor):
                     btIn = float(interf.read())
                     while btIn == 0:
                         print(0)
                         btIn = float(interf.read())
                     avg[k] += btIn
-            for k in range(4):
+            for k in range(nSensor):
                 avg[k] /= 20
                 res = 100 * avg[k] * 3 / (5000 - avg[k] * 3)
                 print(round(res, 2), end='\t')
