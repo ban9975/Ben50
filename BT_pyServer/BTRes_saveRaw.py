@@ -7,7 +7,7 @@ from datetime import datetime
 interf = interface.interface()
 
 def main():
-    fileName = 'wristband/v4/ban_res_test.xlsx'
+    fileName = 'wristband/v4/adi_raw_test.xlsx'
     gestures = ['down', 'up', 'thumb', 'little finger', 'stretch', 'fist', 'rest']
     workbook = load_workbook(fileName)
     start = datetime.now()

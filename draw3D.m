@@ -60,12 +60,14 @@ opts.VariableTypes = ["double", "double", "double", "double", "double", "double"
 resT = readtable("D:\NTU\Ben50\newCord.xlsx", opts, "UseExcel", false);
 res = table2array(resT);
 % disp(res);
-start_ = [2, 8, 18, 32, 50];
-end_ = [6, 16, 30, 48, 70];
+% start_ = [2, 8, 18, 32, 50];
+% end_ = [6, 16, 30, 48, 70];
+start_ = [2, 6, 12, 20];
+end_ = [4, 10, 18, 28];
 xx = [];
 yy = [];
 zz = [];
-for i = 1: 3
+for i = 1: 4
     len = res(start_(i), 1);
     for j = start_(i):end_(i)
         for k = 2:11
