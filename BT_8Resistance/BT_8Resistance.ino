@@ -44,16 +44,16 @@ void loop() {
             if(2*k == nSensor-1) break;
             BTPrint(adc[2*k+1]);
             if(2*k+1 == nSensor-1) break;
-            Serial.print(float(adc[2*k])*300/(5000-float(adc[2*k])*3));
-            Serial.print(' ');
-            Serial.print(adc[2*k]);
-            Serial.print("  ");
-            Serial.print(float(adc[2*k+1])*300/(5000-float(adc[2*k+1])*3));
-            Serial.print(' ');
-            Serial.print(adc[2*k+1]);
-            Serial.print("  ");
+//            Serial.print(float(adc[2*k])*300/(5000-float(adc[2*k])*3));
+//            Serial.print(' ');
+//            Serial.print(adc[2*k]);
+//            Serial.print("  ");
+//            Serial.print(float(adc[2*k+1])*300/(5000-float(adc[2*k+1])*3));
+//            Serial.print(' ');
+//            Serial.print(adc[2*k+1]);
+//            Serial.print("  ");
           }
-          Serial.println();
+//          Serial.println();
         }
       }
       BTSerial.flush();

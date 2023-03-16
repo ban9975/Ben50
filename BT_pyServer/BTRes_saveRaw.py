@@ -7,7 +7,8 @@ from datetime import datetime
 interf = interface.interface()
 
 def main():
-    fileName = 'wristband/v4/adi_raw_test.xlsx'
+    nSensor = 4
+    fileName = 'wristband/v4Plus/adi_v2_1ADC_test.xlsx'
     gestures = ['down', 'up', 'thumb', 'little finger', 'stretch', 'fist', 'rest']
     workbook = load_workbook(fileName)
     start = datetime.now()
@@ -16,7 +17,7 @@ def main():
         worksheet = workbook.create_sheet("calibration")
     else:
         worksheet = workbook.create_sheet("random")
-    title = ['gesture', 'start', 'end', 0, 1, 2, 3]
+    title = ['gesture', 'start', 'end', 0, 1, 2, 3, 4, 5, 6, 7]
     for i in range(len(title)):
         worksheet.cell(row=1, column=i+1, value=title[i])
     row = 2
@@ -38,21 +39,22 @@ def main():
             worksheet.cell(row=row, column=1, value=gesture)
             worksheet.cell(row=row, column=2, value=str(datetime.now()-start))
 
-            avg = [0, 0, 0, 0]
+            avg = [0, 0, 0, 0, 0, 0, 0, 0]
             for j in range(20):
-                for k in range(4):
+                for k in range(nSensor):
                     btIn = float(interf.read())
                     while btIn == 0:
                         print(0)
                         btIn = float(interf.read())
                     avg[k] += btIn
             print(row-1, end='\t')
-            for k in range(4):
+            for k in range(nSensor):
                 avg[k] /= 20
                 res = 300 * avg[k] / (5000 - avg[k] * 3)
-                print(round(res, 2), end='\t')
                 worksheet.cell(row=row, column=k+4, value=round(res, 2))
                 workbook.save(fileName)
+                # if not (k == 1 or k == 2 or k == 4 or k == 6):
+                print(round(res, 2), end='\t')
             print()
             worksheet.cell(row=row, column=3, value=str(datetime.now()-start))
             row += 1
