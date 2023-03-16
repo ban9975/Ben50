@@ -16,7 +16,7 @@ print(trainFile)
 
 x_train, x_test, y_train, y_test = train_test_split(train.features,train.labels,train_size=0.7, random_state=9999)
 # rf
-model = RandomForestClassifier(n_estimators=200, max_depth=5, random_state=9999)
+model = RandomForestClassifier(n_estimators=944, min_samples_split=2,min_samples_leaf=1,max_features='sqrt',max_depth=20, bootstrap=True,random_state=9999)
 model.fit(x_train, y_train)
 
 predictions = model.predict(x_test)
