@@ -8,7 +8,7 @@ interf = interface.interface()
 
 def main():
     nSensor = 4
-    fileName = 'wristband/v4Plus/adi_v2_1ADC_test.xlsx'
+    fileName = 'wristband/v4Plus/adi_v2_1ADC_sticky_real.xlsx'
     gestures = ['down', 'up', 'thumb', 'little finger', 'stretch', 'fist', 'rest']
     workbook = load_workbook(fileName)
     start = datetime.now()
