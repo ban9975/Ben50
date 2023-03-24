@@ -5,7 +5,7 @@
 
 SoftwareSerial BTSerial(8, 9);
 //SoftwareSerial BTSerial(10,11);
-ADS1015 ads(0X49);
+ADS1015 ads(0X48);
 //Adafruit_ADS1015 ads;
 bool start = false;
 byte btRead;
@@ -37,9 +37,9 @@ void loop() {
             adc[k] = ads.readADC(k);
 //              adc[k] = ads.readADC_SingleEnded(k);
 //            filter out abnormal value
-            while(adc[k] >= 1400) {
-              adc[k] = ads.readADC(k);
-            }
+            // while(adc[k] >= 1400) {
+            //   adc[k] = ads.readADC(k);
+            // }
             BTPrint(adc[k]);
             Serial.print(float(adc[k])*300/(5000-float(adc[k])*3));
             Serial.print(' ');

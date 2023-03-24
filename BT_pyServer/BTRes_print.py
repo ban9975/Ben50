@@ -4,7 +4,7 @@ import interface
 interf = interface.interface()
 
 def main():
-    nSensor = 8
+    nSensor = 4
     row = 1
     iter = int(input("Please input the number of iterations: "))
     while iter != 0:
