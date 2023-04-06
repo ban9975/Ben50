@@ -76,6 +76,14 @@ def preprocessGes(cal,random):
     # pd.set_option('display.max_rows', None)
     # print(random)
     return random
+def preprocessFirst(random):
+    nSensor = 4
+    for i in range(nSensor):
+        if(i!=0):
+            for j in range(random[i].size):
+                random[i][j] = random[i][j]-random[0][j]
+    random[0]=random[0].map(lambda z:0)
+    return random
 def preprocessLen(cal,random):
     nSensor = 4
     cal = cal.applymap(calibration)
@@ -104,8 +112,10 @@ class importData:
                     self.data = pd.concat([self.data, preprocessGes(cal,tmp)], ignore_index=True)
                 elif mode == 1:
                     self.data = pd.concat([self.data, preprocessLen(cal,tmp)], ignore_index=True)
-                else:
+                elif mode == 2:
                     self.data = pd.concat([self.data, tmp], ignore_index=True)
+                else:
+                    self.data = pd.concat([self.data,preprocessFirst(tmp)], ignore_index=True)
             elif "calibration" in name:
                 cal = xls.parse(name, usecols=[3,4,5,6])
                 # cal = xls.parse(name, usecols=[3,4,5,6,7,8,9,10])
