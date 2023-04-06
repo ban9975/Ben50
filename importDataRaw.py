@@ -84,6 +84,20 @@ def preprocessFirst(random):
                 random[i][j] = random[i][j]-random[0][j]
     random[0]=random[0].map(lambda z:0)
     return random
+def preprocessFirstGes(cal,random):
+    nSensor = 4
+    nSensor = 4
+    stretch = cal.sum()
+    for i in range(nSensor):
+        stretch[i] = round(stretch[i]/cal.shape[0],2)
+    for i in range(nSensor):
+        random[i] = random[i].map(lambda z:z-stretch[i])
+    for i in range(nSensor):
+        if(i!=0):
+            for j in range(random[i].size):
+                random[i][j] = random[i][j]-random[0][j]
+    random[0]=random[0].map(lambda z:0)
+    return random
 def preprocessLen(cal,random):
     nSensor = 4
     cal = cal.applymap(calibration)
@@ -114,8 +128,10 @@ class importData:
                     self.data = pd.concat([self.data, preprocessLen(cal,tmp)], ignore_index=True)
                 elif mode == 2:
                     self.data = pd.concat([self.data, tmp], ignore_index=True)
-                else:
+                elif mode == 3:
                     self.data = pd.concat([self.data,preprocessFirst(tmp)], ignore_index=True)
+                elif mode == 4:
+                    self.data = pd.concat([self.data, preprocessFirstGes(cal,tmp)], ignore_index=True)
             elif "calibration" in name:
                 cal = xls.parse(name, usecols=[3,4,5,6])
                 # cal = xls.parse(name, usecols=[3,4,5,6,7,8,9,10])
