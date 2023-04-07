@@ -4,10 +4,10 @@ import sys
 import math
 mode=int(input('mode='))
 modes=['ges','len','raw','first','ges+first']
-trainName = 'data_cal/v4Plus/adi_v3_1ADC_glue_01_cal_'+modes[mode]+'_train.xlsx'
-testName = 'data_cal/v4Plus/adi_v3_1ADC_glue_01_cal_'+modes[mode]+'_test.xlsx'
+trainName = 'data_cal/v7/adi_v3_1ADC_cal_'+modes[mode]+'_train.xlsx'
+testName = 'data_cal/v7/adi_v3_1ADC_cal_'+modes[mode]+'_test.xlsx'
 sheetName = "Sheet1"
-plotName = 'v4Plus_adi_v3_1ADC'
+plotName = 'v7_adi_v3_1ADC'
 train = pd.read_excel(trainName, sheet_name=sheetName)
 test = pd.read_excel(testName, sheet_name=sheetName)
 
@@ -19,7 +19,7 @@ for i in range(4):
     elif mode==1:
         plt.xlim(-0.015,0.015)
     elif mode==2:
-        plt.xlim(250,500)
+        plt.xlim(200,400)
     elif mode==3:
         plt.xlim(-130,130)
     elif mode==4:

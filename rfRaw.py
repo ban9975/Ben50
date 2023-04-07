@@ -2,17 +2,17 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import metrics
 
-import importDataMulti
+import importDataRaw
 modes=['gesture','length', 'raw data', 'first round', 'multi']
 mode = int(input("0: gesture, 1: length, 2: raw, 3: first round, 4: all : ")) # 0 for gesture, 1 for length
 # mode = 0
-trainFile = 'wristband/v5/adi.xlsx'
-testFile = 'wristband/v5/adi_test.xlsx'
-train = importDataMulti.importData(trainFile,mode)
-test = importDataMulti.importData(testFile,mode)
-# if mode == 4:
-#     train.data.to_excel(r'data_cal/v4Plus/adi_v3_1ADC_round2_cal_ges+first_train.xlsx')
-#     test.data.to_excel(r'data_cal/v4Plus/adi_v3_1ADC_round2_cal_ges+first_test.xlsx')
+trainFile = 'wristband/v7/adi_v3_1ADC.xlsx'
+testFile = 'wristband/v7/adi_v3_1ADC_test.xlsx'
+train = importDataRaw.importData(trainFile,mode)
+test = importDataRaw.importData(testFile,mode)
+if mode == 2:
+    train.data.to_excel(r'data_cal/v7/adi_v3_1ADC_cal_raw_train.xlsx')
+    test.data.to_excel(r'data_cal/v7/adi_v3_1ADC_cal_raw_test.xlsx')
 print(trainFile)
 
 x_train, x_test, y_train, y_test = train_test_split(train.features,train.labels,train_size=0.7, random_state=9999)
