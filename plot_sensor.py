@@ -4,10 +4,17 @@ import sys
 import math
 mode=int(input('mode='))
 modes=['ges','len','raw','first','ges+first']
+<<<<<<< HEAD
 trainName = 'data_cal/v7/adi_v3_1ADC_cal_'+modes[mode]+'_train.xlsx'
 testName = 'data_cal/v7/adi_v3_1ADC_cal_'+modes[mode]+'_test.xlsx'
 sheetName = "Sheet1"
 plotName = 'v7_adi_v3_1ADC'
+=======
+trainName = 'data_cal/v6/adi_v3_1ADC_cal_'+modes[mode]+'_train.xlsx'
+testName = 'data_cal/v6/adi_v3_1ADC_cal_'+modes[mode]+'_test.xlsx'
+sheetName = "Sheet1"
+plotName = 'v6_adi_v3_1ADC'
+>>>>>>> 24fff41605d5655314c019461436c1761ae1f765
 train = pd.read_excel(trainName, sheet_name=sheetName)
 test = pd.read_excel(testName, sheet_name=sheetName)
 

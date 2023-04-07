@@ -6,6 +6,7 @@ import importDataRaw
 modes=['gesture','length', 'raw data', 'first round', 'multi']
 mode = int(input("0: gesture, 1: length, 2: raw, 3: first round, 4: all : ")) # 0 for gesture, 1 for length
 # mode = 0
+<<<<<<< HEAD
 trainFile = 'wristband/v7/adi_v3_1ADC.xlsx'
 testFile = 'wristband/v7/adi_v3_1ADC_test.xlsx'
 train = importDataRaw.importData(trainFile,mode)
@@ -13,6 +14,15 @@ test = importDataRaw.importData(testFile,mode)
 if mode == 2:
     train.data.to_excel(r'data_cal/v7/adi_v3_1ADC_cal_raw_train.xlsx')
     test.data.to_excel(r'data_cal/v7/adi_v3_1ADC_cal_raw_test.xlsx')
+=======
+trainFile = 'wristband/v6/adi_v3_1ADC.xlsx'
+testFile = 'wristband/v6/adi_v3_1ADC_test.xlsx'
+train = importDataRaw.importData(trainFile,mode)
+test = importDataRaw.importData(testFile,mode)
+if mode == 2:
+    train.data.to_excel(r'data_cal/v6/adi_v3_1ADC_cal_raw_train.xlsx')
+    test.data.to_excel(r'data_cal/v6/adi_v3_1ADC_cal_raw_test.xlsx')
+>>>>>>> 24fff41605d5655314c019461436c1761ae1f765
 print(trainFile)
 
 x_train, x_test, y_train, y_test = train_test_split(train.features,train.labels,train_size=0.7, random_state=9999)

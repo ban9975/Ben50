@@ -107,6 +107,25 @@ class importData:
         xls = pd.ExcelFile(f)
         tmp=pd.DataFrame()
         cal=pd.DataFrame()
+        colName=[]
+        if mode == 0:
+            for i in range(4):
+                colName.append('cal0_'+str(i))
+        elif mode == 1:
+            for i in range(4):
+                colName.append('cal1_'+str(i))
+        elif mode == 2:
+            for i in range(4):
+                colName.append('cal2_'+str(i))
+        elif mode == 3:
+            for i in range(4):
+                colName.append('cal3_'+str(i))
+        elif mode == 4:
+            for i in range(4):
+                colName.append('cal0_'+str(i))
+                colName.append('cal1_'+str(i))
+                colName.append('cal2_'+str(i))
+                colName.append('cal3_'+str(i))
         for name in xls.sheet_names:
             if "random" in name:
                 tmp = xls.parse(name, usecols=[0,3,4,5,6])
@@ -119,6 +138,9 @@ class importData:
                     cal1=preprocessLen(cal,tmp)
                     for i in range(4):
                         tmp['cal1_'+str(i)]=cal1[i]
+                elif mode == 2:
+                    for i in range(4):
+                        tmp['cal2_'+str(i)]=tmp[i]
                 elif mode == 3:
                     cal3=preprocessFirst(tmp)
                     for i in range(4):
@@ -130,16 +152,18 @@ class importData:
                     cal1=preprocessLen(cal,tmp)
                     for i in range(4):
                         tmp['cal1_'+str(i)]=cal1[i]
+                    for i in range(4):
+                        tmp['cal2_'+str(i)]=tmp[i]
                     cal3=preprocessFirst(tmp)
                     for i in range(4):
                         tmp['cal3_'+str(i)]=cal3[i]
-                print(tmp)
+                # print(tmp)
                 self.data = pd.concat([self.data, tmp], ignore_index=True)
             elif "calibration" in name:
                 cal = xls.parse(name, usecols=[3,4,5,6])
                 # cal = xls.parse(name, usecols=[3,4,5,6,7,8,9,10])
         self.labels = self.data['gesture']
-        self.features = self.data-self.data['gesture']
+        self.features = self.data[colName]
         # print(self.data)
         # self.features = self.data[[1,3,5,7]]
         # self.features = self.data[[0,1,2,3,4,5,6,7]]
