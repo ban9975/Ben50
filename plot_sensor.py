@@ -4,10 +4,10 @@ import sys
 import math
 mode=int(input('mode='))
 modes=['ges','len','raw','first','ges+first']
-trainName = 'data_cal/v4Plus/adi_v3_1ADC_glue_01_cal_'+modes[mode]+'_train.xlsx'
-testName = 'data_cal/v4Plus/adi_v3_1ADC_glue_01_cal_'+modes[mode]+'_test.xlsx'
+trainName = 'data_cal/v6/adi_v3_1ADC_cal_'+modes[mode]+'_train.xlsx'
+testName = 'data_cal/v6/adi_v3_1ADC_cal_'+modes[mode]+'_test.xlsx'
 sheetName = "Sheet1"
-plotName = 'v4Plus_adi_v3_1ADC'
+plotName = 'v6_adi_v3_1ADC'
 train = pd.read_excel(trainName, sheet_name=sheetName)
 test = pd.read_excel(testName, sheet_name=sheetName)
 

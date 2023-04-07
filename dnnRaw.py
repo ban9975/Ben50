@@ -16,8 +16,8 @@ tf.random.set_seed(seed)
 modes=['gesture','length', 'raw data', 'first','ges+first']
 mode = int(input("0: gesture, 1: length, 2: raw, 3: first: ")) # 0 for gesture, 1 for length
 # mode = 0
-trainFile = 'wristband/v4Plus/adi_v3_1ADC_round2.xlsx'
-testFile = 'wristband/v4Plus/adi_v3_1ADC_round2_test.xlsx'
+trainFile = 'wristband/v6/adi_v3_1ADC.xlsx'
+testFile = 'wristband/v6/adi_v3_1ADC_test.xlsx'
 train = importDataRaw.importData(trainFile,mode)
 test = importDataRaw.importData(testFile,mode)
 # if mode == 0:
