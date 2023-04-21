@@ -3,18 +3,11 @@ import pandas as pd
 import sys
 import math
 mode=int(input('mode='))
-modes=['ges','len','raw','first','ges+first']
-<<<<<<< HEAD
-trainName = 'data_cal/v7/adi_v3_1ADC_cal_'+modes[mode]+'_train.xlsx'
-testName = 'data_cal/v7/adi_v3_1ADC_cal_'+modes[mode]+'_test.xlsx'
+modes=['ges','len','raw','first','average']
+trainName = 'data_cal/v7/adi_v3_1ADC_average_cal_'+modes[mode]+'_train.xlsx'
+testName = 'data_cal/v7/adi_v3_1ADC_average_cal_'+modes[mode]+'_test.xlsx'
 sheetName = "Sheet1"
-plotName = 'v7_adi_v3_1ADC'
-=======
-trainName = 'data_cal/v6/adi_v3_1ADC_cal_'+modes[mode]+'_train.xlsx'
-testName = 'data_cal/v6/adi_v3_1ADC_cal_'+modes[mode]+'_test.xlsx'
-sheetName = "Sheet1"
-plotName = 'v6_adi_v3_1ADC'
->>>>>>> 24fff41605d5655314c019461436c1761ae1f765
+plotName = 'v7_adi_v3_1ADC_average'
 train = pd.read_excel(trainName, sheet_name=sheetName)
 test = pd.read_excel(testName, sheet_name=sheetName)
 
@@ -30,7 +23,7 @@ for i in range(4):
     elif mode==3:
         plt.xlim(-130,130)
     elif mode==4:
-        plt.xlim(-40,40)
+        plt.xlim(-100,100)
     plt.scatter(train[i],train['gesture'], marker='.',label='train')
     plt.scatter(test[i],test['gesture'], marker='.',label='test')
     plt.title(plotName+' '+modes[mode]+'_{}'.format(i))

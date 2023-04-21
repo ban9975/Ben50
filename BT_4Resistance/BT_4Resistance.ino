@@ -39,9 +39,9 @@ void loop() {
 //              adc[k] = ads.readADC_SingleEnded(k);
 //            filter out abnormal value
               Serial.print(adc[k]);
-            while(adc[k] >= 1450) {
-              adc[k] = ads.readADC(k);
-            }
+            // while(adc[k] >= 1450 || adc[k] <=1150) {
+            //   adc[k] = ads.readADC(k);
+            // }
             BTPrint(adc[k]);
             Serial.print(float(adc[k])*300/(5000-float(adc[k])*3));
             Serial.print(' ');

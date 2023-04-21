@@ -8,7 +8,7 @@ interf = interface.interface()
 
 def main():
     nSensor = 4
-    fileName = 'wristband/v7/adi_v3_1ADC.xlsx'
+    fileName = 'wristband/v7/adi_v3_1ADC_average.xlsx'
     gestures = ['down', 'up', 'thumb', 'little finger', 'stretch', 'fist', 'rest']
     workbook = load_workbook(fileName)
     start = datetime.now()
@@ -23,7 +23,8 @@ def main():
     row = 2
     while True:
         if mode==0:
-            gesture = 4
+            # gesture = 4
+            gesture = (row-2)%7
         else:
             gesture = (row-2)%7
         _input = input("{}\tinput: ".format(gestures[gesture]))
