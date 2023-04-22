@@ -8,15 +8,15 @@ from time import time
 interf = interface.interface()
 
 def main():
-    fileName = 'wristband/factor/length.xlsx'
-    gestures = ['paper','rock']
+    fileName = 'wristband/factor/gesture.xlsx'
+    gestures = ['paper','rock','bend','scissor']
     workbook = load_workbook(fileName)
     title = ['gesture', 't', 'val']
     gesture=1
-    for t in range(10):
+    for t in range(20):
         print('ready')
         readyTimer=time()
-        gesture = 1 if(gesture==0) else 0
+        gesture=t%4
         worksheet = workbook.create_sheet(gestures[gesture])
         for i in range(len(title)):
             worksheet.cell(row=1, column=i+1, value=title[i])
