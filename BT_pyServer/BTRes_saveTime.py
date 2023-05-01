@@ -8,22 +8,22 @@ from time import time
 interf = interface.interface()
 
 def main():
-    fileName = 'wristband/factor/gesture.xlsx'
-    gestures = ['paper','rock','bend','scissor']
+    fileName = 'wristband/factor/10wear_5round.xlsx'
+    gestures = ['paper','rock']
     workbook = load_workbook(fileName)
     title = ['gesture', 't', 'val']
     gesture=1
-    for t in range(20):
-        print('ready')
+    for t in range(10):
+        gesture=t%2
+        print('ready '+gestures[gesture])
         readyTimer=time()
-        gesture=t%4
         worksheet = workbook.create_sheet(gestures[gesture])
         for i in range(len(title)):
             worksheet.cell(row=1, column=i+1, value=title[i])
         row = 2
         while(int((time()-readyTimer)*1000)<1000):
             pass
-        print(str(t)+' '+gestures[gesture])
+        print(str(t))
         interf.write(str(1))
         start = time()
         val = float(interf.read())
