@@ -13,15 +13,15 @@ def res2len(x,z):
     # p12 = -0.027106092579830
     # p03 = 0.717608771791744
     # 1234 model
-    p00 = -0.507608259206727
-    p10 = -0.051576376995291
-    p01 = 1.415932591349663
-    p20 = 0.000886341814277
-    p11 = 0.090505524437003
-    p02 = -1.309889655349322
-    p21 = -0.000880377340775
-    p12 = -0.037931428208836
-    p03 = 0.401973570159907
+    p00 = -0.619036213083872
+    p10 = -0.030800170966657
+    p01 = 1.688322998396718
+    p20 = -0.000611641511412
+    p11 = 0.057794560352152
+    p02 = -1.531793071531490
+    p21 = 0.000488277935669
+    p12 = -0.025444713548645
+    p03 = 0.462421072634841
 
     err = sys.maxsize
     len = 1
@@ -45,15 +45,15 @@ def calibration(z):
     # p12 = -0.027106092579830
     # p03 = 0.717608771791744
     # 1234 model
-    p00 = -0.507608259206727
-    p10 = -0.051576376995291
-    p01 = 1.415932591349663
-    p20 = 0.000886341814277
-    p11 = 0.090505524437003
-    p02 = -1.309889655349322
-    p21 = -0.000880377340775
-    p12 = -0.037931428208836
-    p03 = 0.401973570159907
+    p00 = -0.619036213083872
+    p10 = -0.030800170966657
+    p01 = 1.688322998396718
+    p20 = -0.000611641511412
+    p11 = 0.057794560352152
+    p02 = -1.531793071531490
+    p21 = 0.000488277935669
+    p12 = -0.025444713548645
+    p03 = 0.462421072634841
 
     err = sys.maxsize
     len = 1.8
@@ -67,17 +67,17 @@ def calibration(z):
             len = x
     return len
 def preprocessGes(cal,random):
-    nSensor = 4
-    stretch = cal.sum()
+    nSensor = 3
+    cali = cal.sum()
     for i in range(nSensor):
-        stretch[i] = round(stretch[i]/cal.shape[0],2)
+        cali[i] = round(cali[i]/cal.shape[0],2)
     for i in range(nSensor):
-        random[i] = random[i].map(lambda z:z-stretch[i])
+        random[i] = random[i].map(lambda z:z-cali[i])
     # pd.set_option('display.max_rows', None)
     # print(random)
     return random
 def preprocessFirst(random):
-    nSensor = 4
+    nSensor = 3
     for i in range(nSensor):
         if(i!=0):
             for j in range(random[i].size):
@@ -85,7 +85,7 @@ def preprocessFirst(random):
     random[0]=random[0].map(lambda z:0)
     return random
 def preprocessAverage(cal,random):
-    nSensor = 4
+    nSensor =3
     avg = cal.sum()
     for i in range(nSensor):
         avg[i] = round(avg[i]/cal.shape[0],2)
@@ -94,14 +94,14 @@ def preprocessAverage(cal,random):
     print(avg)
     return random
 def preprocessLen(cal,random):
-    nSensor = 4
+    nSensor = 3
     cal = cal.applymap(calibration)
-    stretch = cal.sum()
+    cali = cal.sum()
     for i in range(nSensor):
-        stretch[i] = round(stretch[i]/cal.shape[0],2)
+        cali[i] = round(cali[i]/cal.shape[0],2)
     # print(stretch)
     for i in range(nSensor):
-        random[i] = random[i].map(lambda z:res2len(stretch[i],z)-1)
+        random[i] = random[i].map(lambda z:res2len(cali[i],z)-1)
     return random
 
 class importData:
@@ -115,7 +115,7 @@ class importData:
         cal=pd.DataFrame()
         for name in xls.sheet_names:
             if "random" in name:
-                tmp = xls.parse(name, usecols=[0,3,4,5,6])
+                tmp = xls.parse(name, usecols=[0,3,4,5])
                 # tmp = xls.parse(name, usecols=[0,3,4,5,6,7,8,9,10])
                 if mode == 0:
                     self.data = pd.concat([self.data, preprocessGes(cal,tmp)], ignore_index=True)
@@ -128,10 +128,10 @@ class importData:
                 elif mode == 4:
                     self.data = pd.concat([self.data, preprocessAverage(cal,tmp)], ignore_index=True)
             elif "calibration" in name:
-                cal = xls.parse(name, usecols=[3,4,5,6])
+                cal = xls.parse(name, usecols=[3,4,5])
                 # cal = xls.parse(name, usecols=[3,4,5,6,7,8,9,10])
         self.labels = self.data['gesture']
-        self.features = self.data[[0,1,2,3]]
+        self.features = self.data[[0,1,2]]
         # self.features = self.data[[1,3,5,7]]
         # self.features = self.data[[0,1,2,3,4,5,6,7]]
         # self.features = self.data[[1,2,3,4,5,6,7]]

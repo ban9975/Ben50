@@ -8,8 +8,9 @@ from time import time
 interf = interface.interface()
 
 def main():
-    fileName = 'D://NTU/Ben50/Excel_data/factor/cylinder_uniform.xlsx'
-    gestures = ['local','uniform']
+    fileName = 'D://NTU/Ben50/Excel_data/factor/base_newPCB.xlsx'
+    gestures = ['paper','rock']
+    # gestures = ['uniform','local']
     workbook = load_workbook(fileName)
     title = ['gesture', 't', 'val']
     gesture=1
@@ -18,7 +19,7 @@ def main():
         gesture=t%2
         print('ready '+gestures[gesture])
         readyTimer=time()
-        while(int((time()-readyTimer)*1000)<5000):
+        while(int((time()-readyTimer)*1000)<1000):
             pass
         print(str(t))
         interf.write(str(1))
@@ -39,7 +40,7 @@ def main():
         for i in range(len(title)):
             worksheet.cell(row=1, column=i+1, value=title[i])
         row = 2
-        while(int((time()-readyTimer)*1000)<5000):
+        while(int((time()-readyTimer)*1000)<1000):
             pass
         print(str(t))
         interf.write(str(1))

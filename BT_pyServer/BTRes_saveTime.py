@@ -8,7 +8,7 @@ from time import time
 interf = interface.interface()
 
 def main():
-    fileName = 'D://NTU/Ben50/Excel_data/factor/cylinder.xlsx'
+    fileName = 'D://NTU/Ben50/Excel_data/factor/base_QQ.xlsx'
     gestures = ['paper','rock']
     # gestures = ['nothing']
     workbook = load_workbook(fileName)
@@ -22,7 +22,7 @@ def main():
         for i in range(len(title)):
             worksheet.cell(row=1, column=i+1, value=title[i])
         row = 2
-        while(int((time()-readyTimer)*1000)<5000):
+        while(int((time()-readyTimer)*1000)<1000):
             pass
         print(str(t))
         interf.write(str(1))
