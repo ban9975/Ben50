@@ -103,7 +103,14 @@ def preprocessLen(cal,random):
     for i in range(nSensor):
         random[i] = random[i].map(lambda z:res2len(cali[i],z)-1)
     return random
-
+def preprocessNorm(cal,random):
+    nSensor = 3
+    cali = cal.sum()
+    for i in range(nSensor):
+        cali[i] = round(cali[i]/cal.shape[0],2)
+    for i in range(nSensor):
+        random[i] = random[i].map(lambda z:(z-cali[i])/cali[i])
+    return random
 class importData:
     def __init__(self, f,mode):
         self.read(f,mode)
@@ -127,6 +134,8 @@ class importData:
                     self.data = pd.concat([self.data,preprocessFirst(tmp)], ignore_index=True)
                 elif mode == 4:
                     self.data = pd.concat([self.data, preprocessAverage(cal,tmp)], ignore_index=True)
+                elif mode == 5:
+                    self.data = pd.concat([self.data,preprocessNorm(cal,tmp)], ignore_index=True)
             elif "calibration" in name:
                 cal = xls.parse(name, usecols=[3,4,5])
                 # cal = xls.parse(name, usecols=[3,4,5,6,7,8,9,10])

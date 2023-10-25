@@ -9,7 +9,7 @@ interf = interface.interface()
 def main():
     nSensor = 3
     BASE_DIR = os.path.dirname(os.path.realpath(__file__))
-    fileName = BASE_DIR+'/../Excel_data/v8/7gestures_test.xlsx'
+    fileName = BASE_DIR+'/../Excel_data/v8/7gestures_rev_little_finger_test.xlsx'
     if os.path.exists(fileName)==False:
         workbook = Workbook()
         workbook.save(fileName)
@@ -29,7 +29,7 @@ def main():
     row = 2
     while True:
         if mode==0:
-            gesture = 3
+            gesture = 5
             # gesture = (row-2)%nGesture
         else:
             gesture = (row-2)%len(gestures)

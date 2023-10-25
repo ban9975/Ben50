@@ -2,15 +2,15 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import pickle
-modes = ['gesture', 'length', 'raw data', 'first round', 'avg']
-mode = int(input("0: gesture, 1: length, 2: raw, 3: first round, 4: avg : "))
+modes = ['gesture', 'length', 'raw data', 'first round', 'avg', 'norm']
+mode = int(input("0: gesture, 1: length, 2: raw, 3: first round, 4: avg, 5: norm : "))
 # colors=['#0080FF', '#FF9224', '#00EC00', '#CE0000','#ACD6FF','#FFDCB9','#BBFFBB','#FF9797']
 colors=['#0080FF', '#FF9224', '#00EC00', '#CE0000','#921AFF','#B9B973','#C07AB8','#ACD6FF','#FFDCB9','#BBFFBB','#FF9797','#DCB5FF','#DEDEBE','#E2C2DE']
 # gestures = ['down', 'up', 'paper','rock']
 gestures = ['down', 'up', 'paper', 'rock','thumb', 'little finger', 'rest']
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))+'/../'
 version='v8'
-fileName='7gestures_'
+fileName='7gestures_rev_little_finger_'
 trainFile = BASE_DIR + 'Excel_data/calibrated/'+version+'/'+fileName+modes[mode]+'_train.xlsx'
 testFile = BASE_DIR + 'Excel_data/calibrated/'+version+'/'+fileName+modes[mode]+'_test.xlsx'
 train=pd.read_excel(trainFile)

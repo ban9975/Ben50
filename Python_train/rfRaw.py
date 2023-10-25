@@ -3,14 +3,17 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn import metrics
 import os
 import importDataRaw
-modes = ['gesture', 'length', 'raw data', 'first round', 'avg']
+import joblib
+import pathlib
+modes = ['gesture', 'length', 'raw data', 'first round', 'avg', 'norm']
 # 0 for gesture, 1 for length
-mode = int(input("0: gesture, 1: length, 2: raw, 3: first round, 4: avg : "))
+mode = int(input("0: gesture, 1: length, 2: raw, 3: first round, 4: avg, 5: norm : "))
 # mode = 0
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))+'/../Excel_data/'
 version='v8'
-fileName='7gestures_'
+fileName='7gestures_little_finger_'
 trainFile = BASE_DIR + version+'/'+fileName+'train.xlsx'
+# fileName = '7gestures_0914_'
 testFile = BASE_DIR + version+'/'+fileName+'test.xlsx'
 train = importDataRaw.importData(trainFile, mode)
 test = importDataRaw.importData(testFile, mode)
@@ -36,6 +39,11 @@ accTest = metrics.accuracy_score(test.labels, predictionsTest)
 print('train: ', acc)
 print('test: ', accTest)
 print()
+modelPath = os.path.join(os.path.dirname(os.path.realpath(__file__))+'/../Model/',version)
+print(modelPath)
+if not os.path.exists(modelPath):
+    pathlib.Path(modelPath).mkdir(parents=True)
+joblib.dump(model, os.path.join(modelPath,fileName[:-1]+'.joblib'))
 # # Visualize a tree
 # estimator = model.estimators_[5]
 # from sklearn.tree import export_graphviz

@@ -14,9 +14,9 @@ def main():
             for j in range(20):
                 for k in range(nSensor):
                     btIn = float(interf.read())
-                    while btIn == 0:
-                        print(0)
-                        btIn = float(interf.read())
+                    # while btIn == 0:
+                    #     print(0)
+                    #     btIn = float(interf.read())
                     avg[k] += btIn
             for k in range(nSensor):
                 avg[k] /= 20

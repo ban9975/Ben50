@@ -10,6 +10,7 @@ class bluetooth:
     def do_connect(self,port):
         self.ser.close()
         print("Connecting...")
+        print(port)
         try:
             self.ser = serial.Serial(port,38400,timeout=2)
             print("connect success")

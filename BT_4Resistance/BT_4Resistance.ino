@@ -45,8 +45,8 @@ void loop() {
             // }
             BTPrint(adc[k]);
             // Serial.print(float(adc[k])*300/(5000-float(adc[k])*3));
-            // Serial.print(' ');
-            // Serial.print(adc[k]);
+            Serial.print(' ');
+            Serial.print(adc[k]);
             // Serial.print("  ");
           }
           Serial.println();
