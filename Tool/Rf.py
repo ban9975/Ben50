@@ -46,7 +46,7 @@ class Rf:
         return result
 
     def saveModel(self, path):
-        joblib.dump(self.model, path + ".joblib")
+        joblib.dump(self.model, f'{path.split(".")[0]}_{modes[self.mode]}.joblib')
     
     def confusionMatrix(self, path):
         train_matrix = confusion_matrix(self.expected_train, self.actual_train)
@@ -78,7 +78,8 @@ class Rf:
 
     def calibration(self):
         bt.write("1")
-        avg = self._readData()
+        data = self._readData()
+        avg = [sum(data[k]) for k in range(nSensor)]
         for k in range(nSensor):
             avg[k] = 1000 * avg[k] / 20 * 3 / (5000 - avg[k] / 20 * 3)
             self.cali[k] += avg[k] / caliCnt
@@ -98,7 +99,8 @@ class Rf:
 
     def predict(self):
         bt.write("1")
-        avg = self._readData()
+        data = self._readData()
+        avg = [sum(data[k]) for k in range(nSensor)]
         for k in range(nSensor):
             avg[k] = 1000 * avg[k] / 20 * 3 / (5000 - avg[k] / 20 * 3)
         result = self.model.predict([[a - c for a, c in zip(avg, self.cali)]])[0]

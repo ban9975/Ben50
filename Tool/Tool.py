@@ -12,7 +12,7 @@ from BTController import bt, list_all_ports
 from Rf import modes, caliCnt, Rf, gestures, nSensor
 from Plot import Plot
 
-
+root = os.getcwd()
 class Tool(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -35,6 +35,7 @@ class Tool(QMainWindow):
         self.tab.addTab(CollectPage(), "Collect")
         self.layout.addWidget(self.tab)
         self.setCentralWidget(self.widget)
+        self.setFixedSize(1800, 900)
         self.show()
 
     def connectBT(self):
@@ -89,7 +90,7 @@ class TrainPage(QWidget):
 
     def selectFile(self, label: QLabel):
         dialog = QFileDialog(self)
-        dialog.setDirectory('./Excel_data')
+        dialog.setDirectory(os.path.join(root,'Excel_data'))
         dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
         dialog.setViewMode(QFileDialog.ViewMode.List)
         if dialog.exec():
@@ -104,12 +105,12 @@ class TrainPage(QWidget):
         self.result.setText(self.rf.runRf())
 
     def saveModel(self):
-        fileName = QFileDialog.getSaveFileName(directory='./Model')
+        fileName = QFileDialog.getSaveFileName(directory=os.path.join(root,'Model'))
         self.rf.saveModel(fileName[0])
 
     def plot(self):
         self.plot = Plot()
-        fileName = QFileDialog.getSaveFileName(directory='./Wristband_plots/versions')
+        fileName = QFileDialog.getSaveFileName(directory=os.path.join(root,'Wristband_plots/versions'))
         if self.plotDropdown.currentText() == '3D':
             self.plot.plot_3d(self.trainPath.text(), self.testPath.text(), self.mode.currentIndex(), fileName[0])
         elif self.plotDropdown.currentText() == 'Sensor':
@@ -153,13 +154,13 @@ class PredictPage(QWidget):
         self.layout.addWidget(self.camera, 4, 2, 1, 1)
         self.calikey = QShortcut(QKeySequence("Return"), self)
         self.calikey.activated.connect(self.caliNext)
-        self.cap = cv2.VideoCapture(0)
-        self.camTimer = QTimer()
-        self.camTimer.timeout.connect(self.show_camera)
-        self.camTimer.start(30)
+        # self.cap = cv2.VideoCapture(0)
+        # self.camTimer = QTimer()
+        # self.camTimer.timeout.connect(self.show_camera)
+        # self.camTimer.start(30)
 
     def selectFile(self, label: QLabel):
-        dialog = QFileDialog(self)
+        dialog = QFileDialog(self, directory=os.path.join(root,'Model'))
         dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
         dialog.setViewMode(QFileDialog.ViewMode.List)
         if dialog.exec():
@@ -185,7 +186,6 @@ class PredictPage(QWidget):
         self.thread.start()
 
     def setLabel(self, result, values):
-        print(os.path.join(os.getcwd(), "Tool", "gesture_figs", f"{result}.png"))
         self.result.setText(result)
         self.resultFig.setPixmap(
             QPixmap(os.path.join(os.getcwd(), "Tool", "gesture_figs", f"{result}.png"))
@@ -248,16 +248,14 @@ class CollectPage(QWidget):
         self.fileBtn.clicked.connect(self.selectFile)
         self.gestureCombo = QComboBox()
         self.gestureCombo.addItems(gestures)
-        self.trainBtn = QPushButton("Collect train")
-        self.trainBtn.clicked.connect(
-            lambda: self.collect("train", self.gestureCombo.currentIndex())
-        )
-        self.testBtn = QPushButton("Collect test")
-        self.testBtn.clicked.connect(
-            lambda: self.collect("test", self.gestureCombo.currentIndex())
+        self.collectBtn = QPushButton("Collect")
+        self.collectBtn.clicked.connect(
+            lambda: self.collect(self.gestureCombo.currentIndex())
         )
         self.nextBtn = QPushButton("Next")
         self.nextBtn.setDisabled(True)
+        self.backBtn = QPushButton("Back")
+        self.backBtn.setDisabled(True)
         self.stopBtn = QPushButton("Stop")
         self.stopBtn.setDisabled(True)
         self.gesture = QLabel()
@@ -266,9 +264,9 @@ class CollectPage(QWidget):
         self.layout.addWidget(self.filePath, 0, 0, 1, 2)
         self.layout.addWidget(self.fileBtn, 0, 2, 1, 1)
         self.layout.addWidget(self.gestureCombo, 1, 0, 1, 1)
-        self.layout.addWidget(self.trainBtn, 1, 1, 1, 1)
-        self.layout.addWidget(self.testBtn, 1, 2, 1, 1)
-        self.layout.addWidget(self.nextBtn, 2, 1, 1, 1)
+        self.layout.addWidget(self.collectBtn, 1, 1, 1, 1)
+        self.layout.addWidget(self.nextBtn, 2, 0, 1, 1)
+        self.layout.addWidget(self.backBtn, 2, 1, 1, 1)
         self.layout.addWidget(self.stopBtn, 2, 2, 1, 1)
         self.layout.addWidget(self.gesture, 3, 0, 1, 1)
         self.layout.addWidget(self.values, 3, 1, 1, 2)
@@ -276,16 +274,17 @@ class CollectPage(QWidget):
         self.nextkey.activated.connect(self.next)
 
     def selectFile(self):
-        fileName = QFileDialog.getSaveFileName(directory="./Excel_data")[0]
+        fileName = QFileDialog.getSaveFileName(directory=os.path.join(root,'Excel_data'))[0].split(".")[0] + ".xlsx"
         self.filePath.setText(fileName)
 
-    def collect(self, type, caliGesture):
+    def collect(self, caliGesture):
         self.disableBtns(True)
-        fileName = self.filePath.text() + f"_{type}.xlsx"
+        fileName = self.filePath.text()
         self.thread = QThread()
         self.worker = CollectWorker(fileName, caliGesture)
-        self.nextBtn.clicked.connect(self.worker.nextSignal.emit)
-        self.stopBtn.clicked.connect(self.worker.stopSignal.emit)
+        self.nextBtn.clicked.connect(lambda:self.worker.nextSignal.emit())
+        self.backBtn.clicked.connect(lambda:self.worker.backSignal.emit())
+        self.stopBtn.clicked.connect(lambda:self.worker.stopSignal.emit())
         self.worker.gestureSignal.connect(lambda gesture: self.gesture.setText(gesture))
         self.worker.resultSignal.connect(lambda values: self.values.setText(values))
         self.worker.finishSignal.connect(lambda: self.disableBtns(False))
@@ -301,9 +300,9 @@ class CollectPage(QWidget):
             self.worker.nextSignal.emit()
 
     def disableBtns(self, state):
-        self.trainBtn.setDisabled(state)
-        self.testBtn.setDisabled(state)
+        self.collectBtn.setDisabled(state)
         self.nextBtn.setDisabled(not state)
+        self.backBtn.setDisabled(not state)
         self.stopBtn.setDisabled(not state)
 
 
@@ -311,6 +310,7 @@ class CollectWorker(QObject):
     gestureSignal = pyqtSignal(str)
     resultSignal = pyqtSignal(str)
     nextSignal = pyqtSignal()
+    backSignal = pyqtSignal()
     stopSignal = pyqtSignal()
     finishSignal = pyqtSignal()
 
@@ -319,9 +319,12 @@ class CollectWorker(QObject):
         self.rf = Rf()
         self.next = False
         self.stop = False
+        self.cnt = 0
+        self.state = "Calibration"
         self.filePath = filePath
         self.caliGesture = caliGesture
         self.nextSignal.connect(lambda: setattr(self, "next", True))
+        self.backSignal.connect(self.back)
         self.stopSignal.connect(lambda: setattr(self, "stop", True))
 
     def work(self):
@@ -337,15 +340,17 @@ class CollectWorker(QObject):
             worksheet.cell(row=1, column=i + 1, value=title[i])
         for i in range(nSensor):
             worksheet.cell(row=1, column=20 * i + len(title) + 1, value=i)
-        for i in range(caliCnt):
-            self.gestureSignal.emit(f"Calibration {i+1} {gestures[self.caliGesture]}")
+        self.cnt = 0
+        while self.cnt < caliCnt:
+            self.gestureSignal.emit(f"Calibration {self.cnt+1} {gestures[self.caliGesture]}")
             while not self.next:
                 pass
-            worksheet.cell(row=i + 2, column=1, value=self.caliGesture)
+            worksheet.cell(row=self.cnt + 2, column=1, value=self.caliGesture)
             self.resultSignal.emit(
-                self.rf.collect(worksheet, i + 2, start),
+                self.rf.collect(worksheet, self.cnt + 2, start),
             )
             workbook.save(self.filePath)
+            self.cnt += 1
             self.next = False
         start = datetime.now()
         worksheet = workbook.create_sheet("random")
@@ -353,27 +358,37 @@ class CollectWorker(QObject):
             worksheet.cell(row=1, column=i + 1, value=title[i])
         for i in range(nSensor):
             worksheet.cell(row=1, column=20 * i + len(title) + 1, value=i)
-        i = 0
+        self.cnt = 0
+        self.state = "Collect"
         while not self.stop:
-            self.gestureSignal.emit(f"Collect {i+1} {gestures[i%len(gestures)]}")
+            self.gestureSignal.emit(f"Collect {self.cnt+1} {gestures[self.cnt%len(gestures)]}")
             while not self.next:
                 if self.stop:
                     break
-            worksheet.cell(row=i + 2, column=1, value=i % len(gestures))
+            if self.stop:
+                break
+            worksheet.cell(row=self.cnt + 2, column=1, value=self.cnt % len(gestures))
             self.resultSignal.emit(
-                self.rf.collect(worksheet, i + 2, start),
+                self.rf.collect(worksheet, self.cnt + 2, start),
             )
             workbook.save(self.filePath)
-            i += 1
+            self.cnt += 1
             self.next = False
         workbook.close()
         self.finishSignal.emit()
+    
+    def back(self):
+        self.cnt = max(self.cnt-1, 0)
+        if self.state == "Calibration":
+            self.gestureSignal.emit(f"Calibration {self.cnt+1} {gestures[self.caliGesture]}")
+        else:
+            self.gestureSignal.emit(f"Collect {self.cnt+1} {gestures[self.cnt%len(gestures)]}")
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     font = QFont()
-    font.setPointSize(20)
+    font.setPointSize(13)
     app.setFont(font)
     MainWindow = Tool()
     sys.exit(app.exec_())

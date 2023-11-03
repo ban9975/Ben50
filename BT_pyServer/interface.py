@@ -9,7 +9,7 @@ class interface:
         print("")
         self.ser = BT.bluetooth()
         # COM adi: 12, ban: 5, adi_mac: /dev/cu.BioLabG2
-        port = '/dev/cu.H-C-2010-06-01'
+        port = 'COM12'
         while(not self.ser.do_connect(port)):
             self.ser.do_connect(port)
         self.write('0')
