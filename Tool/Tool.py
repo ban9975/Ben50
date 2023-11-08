@@ -154,10 +154,10 @@ class PredictPage(QWidget):
         self.layout.addWidget(self.camera, 4, 2, 1, 1)
         self.calikey = QShortcut(QKeySequence("Return"), self)
         self.calikey.activated.connect(self.caliNext)
-        # self.cap = cv2.VideoCapture(0)
-        # self.camTimer = QTimer()
-        # self.camTimer.timeout.connect(self.show_camera)
-        # self.camTimer.start(30)
+        self.cap = cv2.VideoCapture(0)
+        self.camTimer = QTimer()
+        self.camTimer.timeout.connect(self.show_camera)
+        self.camTimer.start(30)
 
     def selectFile(self, label: QLabel):
         dialog = QFileDialog(self, directory=os.path.join(root,'Model'))
@@ -171,8 +171,8 @@ class PredictPage(QWidget):
         self.disableBtns(False)
         self.thread = QThread()
         self.worker = PredictWorker(self.modelPath.text())
-        self.nextBtn.clicked.connect(self.worker.nextSignal.emit)
-        self.stopBtn.clicked.connect(self.worker.stopSignal.emit)
+        self.nextBtn.clicked.connect(lambda:self.worker.nextSignal.emit())
+        self.stopBtn.clicked.connect(lambda:self.worker.stopSignal.emit())
         self.worker.resultSignal.connect(
             lambda result, values: self.setLabel(result, values)
         )
