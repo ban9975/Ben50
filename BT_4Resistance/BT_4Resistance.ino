@@ -8,6 +8,7 @@ SoftwareSerial BTSerial(8, 9);
 ADS1015 ads(0X48);
 //Adafruit_ADS1015 ads;
 bool start = false;
+const int nSensor=3;
 byte btRead;
 unsigned int anaIn;
 int16_t adc[4];
@@ -34,19 +35,19 @@ void loop() {
       Serial.println("loop");
       for(byte j = 0; j < btRead; ++j) {
         for(byte i = 0; i < 20; ++i) {
-          for(byte k = 0; k < 4; ++k) {
+          for(byte k = 0; k < nSensor; ++k) {
             adc[k] = ads.readADC(k);
 //              adc[k] = ads.readADC_SingleEnded(k);
 //            filter out abnormal value
-              Serial.print(adc[k]);
+              // Serial.print(adc[k]);
             // while(adc[k] >= 1450 || adc[k] <=1150) {
             //   adc[k] = ads.readADC(k);
             // }
             BTPrint(adc[k]);
-            Serial.print(float(adc[k])*300/(5000-float(adc[k])*3));
+            // Serial.print(float(adc[k])*300/(5000-float(adc[k])*3));
             Serial.print(' ');
             Serial.print(adc[k]);
-            Serial.print("  ");
+            // Serial.print("  ");
           }
           Serial.println();
         }

@@ -1,5 +1,5 @@
-from pickle import NONE
 import interface
+import os
 
 from openpyxl import *
 from datetime import datetime
@@ -7,9 +7,15 @@ from datetime import datetime
 interf = interface.interface()
 
 def main():
-    nSensor = 4
-    fileName = 'wristband/v7/adi_v3_1ADC_average.xlsx'
-    gestures = ['down', 'up', 'thumb', 'little finger', 'stretch', 'fist', 'rest']
+    nSensor = 3
+    BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+    fileName = BASE_DIR+'/../Excel_data/v8/7gestures_rev_little_finger_test.xlsx'
+    if os.path.exists(fileName)==False:
+        workbook = Workbook()
+        workbook.save(fileName)
+        workbook.close()
+    gestures = ['down', 'up', 'paper', 'rock','thumb', 'little finger', 'rest']
+    # gestures = ['down', 'up', 'paper','rock']
     workbook = load_workbook(fileName)
     start = datetime.now()
     mode = int(input("0: calibration, 1: random: "))
@@ -17,16 +23,16 @@ def main():
         worksheet = workbook.create_sheet("calibration")
     else:
         worksheet = workbook.create_sheet("random")
-    title = ['gesture', 'start', 'end', 0, 1, 2, 3, 4, 5, 6, 7]
+    title = ['gesture', 'start', 'end', 0, 1, 2]
     for i in range(len(title)):
         worksheet.cell(row=1, column=i+1, value=title[i])
     row = 2
     while True:
         if mode==0:
-            # gesture = 4
-            gesture = (row-2)%7
+            gesture = 5
+            # gesture = (row-2)%nGesture
         else:
-            gesture = (row-2)%7
+            gesture = (row-2)%len(gestures)
         _input = input("{}\tinput: ".format(gestures[gesture]))
         if _input == 'b':
             row -= 1
@@ -51,7 +57,7 @@ def main():
             print(row-1, end='\t')
             for k in range(nSensor):
                 avg[k] /= 20
-                res = 300 * avg[k] / (5000 - avg[k] * 3)
+                res = 1000 * avg[k] * 3 / (5000 - avg[k] * 3)
                 worksheet.cell(row=row, column=k+4, value=round(res, 2))
                 workbook.save(fileName)
                 # if not (k == 1 or k == 2 or k == 4 or k == 6):

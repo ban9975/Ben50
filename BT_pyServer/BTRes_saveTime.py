@@ -8,11 +8,12 @@ from time import time
 interf = interface.interface()
 
 def main():
-    fileName = 'wristband/factor/10wear_5round.xlsx'
+    fileName = 'D://NTU/Ben50/Excel_data/factor/base_QQ.xlsx'
     gestures = ['paper','rock']
+    # gestures = ['nothing']
     workbook = load_workbook(fileName)
     title = ['gesture', 't', 'val']
-    gesture=1
+    gesture=0
     for t in range(10):
         gesture=t%2
         print('ready '+gestures[gesture])
