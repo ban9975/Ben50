@@ -14,7 +14,7 @@ if not os.path.exists(saveFolder):
 for sheetName in xls.sheet_names:
     data = xls.parse(sheetName)
     plt.figure()
-    plt.ylim(800,2600)
+    plt.ylim(800,2900)
     plt.title(f"{fileName} {sheetName}")
     for col in data.columns:
         plt.plot(data[col])
