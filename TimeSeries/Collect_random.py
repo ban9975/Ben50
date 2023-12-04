@@ -25,8 +25,6 @@ while True:
     t = input('time: ')
     if t == 'e':
         break
-    else:
-        t = int(t)
     worksheet = workbook.create_sheet()
     for i in range(len(title)):
         worksheet.cell(row=1, column=i + 1, value=title[i])
@@ -44,6 +42,7 @@ while True:
                 ges = random.randint(0, 2)
                 print(gestures[ges])
             else:
+                ges = 999
                 print('neutral')
             section += 1
             start = time.time()
@@ -55,7 +54,7 @@ while True:
                 btIn = float(bt.read())
             data.append(btIn)
         data = [round(3000 * data[i] / (5000 - data[i] * 3), 2) for i in range(nSensor)]
-        worksheet.cell(row=row, column=2, value=ges)
+        worksheet.cell(row=row, column=1, value=ges)
         worksheet.cell(row=row, column=2, value=data[0])
         worksheet.cell(row=row, column=3, value=data[1])
         worksheet.cell(row=row, column=4, value=data[2])
