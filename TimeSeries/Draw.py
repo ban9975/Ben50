@@ -12,13 +12,15 @@ saveFolder = os.path.join(
 if not os.path.exists(saveFolder):
     os.mkdir(saveFolder)
 for sheetName in xls.sheet_names:
-    if sheetName == 'Sheet':
-        continue
+    # if sheetName == 'Sheet':
+    #     continue
     data = xls.parse(sheetName)
     plt.figure()
     plt.ylim(800, 2900)
     plt.title(f"{fileName} {sheetName}")
     for col in data.columns:
+        if col == 'gesture':
+            continue
         plt.plot(
             [i * 10 for i in range(len(data[col]))], data[col], label=f"Sensor {col}"
         )

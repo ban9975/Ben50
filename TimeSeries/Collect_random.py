@@ -1,6 +1,7 @@
 import sys
 import os
 import random
+
 parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(parent_dir)
 from BT_common.BTController import BTController
@@ -22,9 +23,10 @@ if not os.path.exists(fileName):
     workbook.close()
 workbook = load_workbook(fileName)
 while True:
-    t = input('time: ')
-    if t == 'e':
-        break
+    t = input("start?")
+    if t == "e":
+        break    
+    t = "28"
     worksheet = workbook.create_sheet()
     for i in range(len(title)):
         worksheet.cell(row=1, column=i + 1, value=title[i])
@@ -32,18 +34,23 @@ while True:
     print("ready")
     time.sleep(1)
     bt.write(t)
-    val = float(bt.read())
-    section = 0
     start = time.time()
-    ges = 999 # neutral
+    section = 0
+    ges = 999  # neutral
+    gestureList = [0, 1, 2,0,1,2]
+    random.shuffle(gestureList)
+    j = 0
+    val = float(bt.read())
     while val != 2048:
-        if time.time() - start > 1:
-            if section % 2 == 1:
-                ges = random.randint(0, 2)
+        # print(time.time(), start)
+        if time.time() - start > 2:
+            if section % 2 == 1 and section < len(gestureList) * 2:
+                ges = gestureList[j]
+                j += 1
                 print(gestures[ges])
-            else:
+            elif section % 2 == 0 or section >= len(gestureList) * 2:
                 ges = 999
-                print('neutral')
+                print("neutral")
             section += 1
             start = time.time()
         data = [val]
@@ -52,6 +59,8 @@ while True:
             while btIn == 0:
                 print(0)
                 btIn = float(bt.read())
+            if btIn == 2048:
+                print("missed")
             data.append(btIn)
         data = [round(3000 * data[i] / (5000 - data[i] * 3), 2) for i in range(nSensor)]
         worksheet.cell(row=row, column=1, value=ges)
