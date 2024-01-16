@@ -16,10 +16,11 @@ for sheetName in xls.sheet_names:
     #     continue
     data = xls.parse(sheetName)
     plt.figure()
-    plt.ylim(800, 2900)
+    plt.ylim(800, 3200)
     plt.title(f"{fileName} {sheetName}")
     for col in data.columns:
         if col == 'gesture':
+            plt.plot([i * 10 for i in range(len(data[col]))], [i*50+3000 for i in data[col]], label="gesture")
             continue
         plt.plot(
             [i * 10 for i in range(len(data[col]))], data[col], label=f"Sensor {col}"
