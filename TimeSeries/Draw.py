@@ -10,17 +10,19 @@ saveFolder = os.path.join(
     os.getcwd(), "Wristband_plots/versions/v8/Time_series", fileName
 )
 if not os.path.exists(saveFolder):
-    os.mkdir(saveFolder)
+    os.makedirs(saveFolder, exist_ok=True)
 for sheetName in xls.sheet_names:
-    # if sheetName == 'Sheet':
-    #     continue
     data = xls.parse(sheetName)
     plt.figure()
-    plt.ylim(800, 3200)
+    plt.ylim(500, 3200)
     plt.title(f"{fileName} {sheetName}")
     for col in data.columns:
-        if col == 'gesture':
-            plt.plot([i * 10 for i in range(len(data[col]))], [i*50+3000 for i in data[col]], label="gesture")
+        if col == "gesture":
+            plt.plot(
+                [i * 10 for i in range(len(data[col]))],
+                [i * 50 + 3000 for i in data[col]],
+                label="gesture",
+            )
             continue
         plt.plot(
             [i * 10 for i in range(len(data[col]))], data[col], label=f"Sensor {col}"

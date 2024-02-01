@@ -1,8 +1,9 @@
 from kneed import KneeLocator
 import matplotlib.pyplot as plt
 import pandas as pd
-import os
+from DataParser import *
 from scipy.signal import savgol_filter
+import csv
 
 
 class EKParameter:
@@ -22,13 +23,77 @@ class EKGroupParameter:
         concaveInc: EKParameter,
         concaveDec: EKParameter,
         convexDec: EKParameter,
-    ) -> list[tuple[int, int]]:
+    ):
         self.smooth = smooth
         self.smoothPolyOrder = smoothPolyOrder
         self.convexInc = convexInc
         self.concaveInc = concaveInc
         self.concaveDec = concaveDec
         self.convexDec = convexDec
+
+
+def importEKFile(fileName: str) -> tuple[list[list[float]], list[int]]:
+    csvFile = pd.read_csv(fileName).values.tolist()
+    allFeatures = []
+    allLabel = []
+    for row in csvFile:
+        if len(row) != 25:
+            continue
+        features = [
+            *row[1:3],
+            *row[9:11],
+            *row[17:19],
+            *row[3:5],
+            *row[11:13],
+            *row[19:21],
+            *row[5:7],
+            *row[13:15],
+            *row[21:23],
+            *row[7:9],
+            *row[15:17],
+            *row[23:25],
+        ]
+        allFeatures.append(features)
+        allLabel.append(gestureDict[row[0]])
+    return allFeatures, allLabel
+
+
+def loadEKFolder(folderPath: str) -> tuple[list[list[float]], list[int]]:
+    allFeatures = []
+    allLabel = []
+    for fileName in os.listdir(folderPath):
+        if fileName.endswith(".csv"):
+            features, label = importEKFile(os.path.join(folderPath, fileName))
+            allFeatures += features
+            allLabel += label
+    return allFeatures, allLabel
+
+
+def exportEKFile(fileName: str, outputPath: str):
+    if not os.path.exists(
+        os.path.join(os.getcwd(), "Excel_data/v8/Time_series", outputPath)
+    ):
+        os.mkdir(os.path.join(os.getcwd(), "Excel_data/v8/Time_series", outputPath))
+    xls = pd.ExcelFile(
+        os.path.join(os.getcwd(), "Excel_data/v8/Time_series", f"{fileName}.xlsx")
+    )
+    for sheetName in xls.sheet_names:
+        with open(
+            os.path.join(
+                os.getcwd(),
+                "Excel_data/v8/Time_series",
+                outputPath,
+                f"{fileName}_{sheetName}.csv",
+            ),
+            "a",
+            newline="",
+        ) as csvfile:
+            writer = csv.writer(csvfile)
+            allData = loadRawDataFile(fileName, [sheetName])
+            allFeatures, allLabel = fullEKProcessing(allData)
+            for i in range(len(allFeatures)):
+                row = [allLabel[i]] + allFeatures[i]
+                writer.writerow(row)
 
 
 def smooth(y, window_length, polyorder):
@@ -135,7 +200,8 @@ def removeDuplicate(
     popList = []
     for ek in ekList:
         if any(
-            (ek[0], point) in ekList for point in range(ek[1] - duplicateRange, ek[1], 10)
+            (ek[0], point) in ekList
+            for point in range(ek[1] - duplicateRange, ek[1], 10)
         ):
             popList.append(ek)
     for ek in popList:
@@ -224,6 +290,7 @@ def splitGroup(
     ek1: list[tuple[int, int]],
     ek2: list[tuple[int, int]],
 ) -> tuple[list[list[int]], list[int]]:
+    # print(ek0, ek1, ek2)
     expected = 0
     features = []
     label = []
@@ -233,16 +300,16 @@ def splitGroup(
             if expected == 0:
                 timeStart = ek0[i][1]
             pending += [
-                ek0[i][1]-timeStart,
-                data["0"][ek0[i][1]//10],
-                ek1[i][1]-timeStart,
-                data["1"][ek1[i][1]//10],
-                ek2[i][1]-timeStart,
-                data["2"][ek2[i][1]//10],
+                ek0[i][1] - timeStart,
+                data["0"][ek0[i][1] // 10],
+                ek1[i][1] - timeStart,
+                data["1"][ek1[i][1] // 10],
+                ek2[i][1] - timeStart,
+                data["2"][ek2[i][1] // 10],
             ]
             if expected == 3:
-                features.append(pending[1:])
-                label.append(data['gesture'][(features[-1][5] + timeStart)//10])
+                features.append(pending)
+                label.append(data["gesture"][(features[-1][5] + timeStart) // 10])
                 pending = []
                 expected = 0
             else:
@@ -251,17 +318,6 @@ def splitGroup(
             pending = []
             expected = 0
     return features, label
-
-def loadFile(fileName: str, sheetName: list[str] = []) -> list[pd.DataFrame]:
-    data = []
-    xls = pd.ExcelFile(
-        os.path.join(os.getcwd(), "Excel_data/v8/Time_series", f"{fileName}.xlsx")
-    )
-    if sheetName == []:
-        sheetName = xls.sheet_names
-    for name in sheetName:
-        data.append(xls.parse(name))
-    return data
 
 
 def plot(data: pd.DataFrame, sensorNum: int, ekList: list[tuple[int, int]]):
@@ -272,8 +328,31 @@ def plot(data: pd.DataFrame, sensorNum: int, ekList: list[tuple[int, int]]):
         plt.plot(ek[1], data[col][ek[1] // 10], color[ek[0]])
 
 
-if __name__ == "__main__":
-    allData = loadFile('band2_0116')
+def plotAverage(allFeatures: list[list[float]], allLabel: list[int]):
+    allFeatures = [[0] + x for x in allFeatures]
+    colors = ["blue", "green", "red"]
+    lineStyle = ["-", "--", ":"]
+    label = ["down", "up", "open"]
+    avg = [[0 for i in range(24)] for j in range(3)]
+    for i in range(len(allFeatures)):
+        avg[allLabel[i]] = [avg[allLabel[i]][j] + allFeatures[i][j] for j in range(24)]
+
+    for i in range(3):
+        avg[i] = [avg[i][j] / allLabel.count(i) for j in range(len(avg[i]))]
+        for j in range(0, 6, 2):
+            plt.plot(
+                avg[i][j::6],
+                avg[i][j + 1 :: 6],
+                colors[i],
+                linestyle=lineStyle[j // 2],
+                marker=".",
+                label=label[i] + str(j // 2),
+            )
+    plt.legend(fontsize="7")
+    plt.show()
+
+
+def fullEKProcessing(allData=list[pd.DataFrame]) -> tuple[list[list[float]], list[int]]:
     allFeatures = []
     allLabel = []
     for data in allData:
@@ -314,7 +393,18 @@ if __name__ == "__main__":
             ),
         )
         ek0, ek1, ek2 = postprocess(ek0, ek1, ek2, 70, 70)
+        # plot(data, 0, ek0)
+        # plot(data, 1, ek1)
+        # plot(data, 2, ek2)
+        # plt.show()
         features, label = splitGroup(data, ek0, ek1, ek2)
-        allFeatures+=features
-        allLabel+=label
-    print(len(allFeatures))
+        allFeatures += features
+        allLabel += label
+    return allFeatures, allLabel
+
+
+if __name__ == "__main__":
+    allData = loadRawDataFile("rick/raw_data/band4_0128", ["d-o2"])
+    allFeatures, allLabel = fullEKProcessing(allData)
+    plotAverage(allFeatures, allLabel)
+    print(len(allFeatures), len(allLabel))
