@@ -197,6 +197,7 @@ def findEK(data: pd.DataFrame, sensorNum: int, parameters: EKGroupParameter):
 def removeDuplicate(
     ekList: list[tuple[int, int]], duplicateRange: int
 ) -> list[tuple[int, int]]:
+    duplicateRange = duplicateRange * 10  # change unit from grid to millisecond
     popList = []
     for ek in ekList:
         if any(
@@ -209,18 +210,13 @@ def removeDuplicate(
     return ekList
 
 
-def postprocess(
+def complement(
     ek0: list[tuple[int, int]],
     ek1: list[tuple[int, int]],
     ek2: list[tuple[int, int]],
-    duplicateRange: int,
     sensorRange: int,
 ) -> tuple[list[tuple[int, int]], list[tuple[int, int]], list[tuple[int, int]]]:
-    duplicateRange = duplicateRange * 10  # change unit from grid to millisecond
     sensorRange = sensorRange * 10  # change unit from grid to millisecond
-    ek0 = removeDuplicate(ek0, duplicateRange)
-    ek1 = removeDuplicate(ek1, duplicateRange)
-    ek2 = removeDuplicate(ek2, duplicateRange)
     ekCount = len(ek0)
     i = 0
     while i < ekCount:
@@ -283,6 +279,48 @@ def postprocess(
     ek2.sort(key=lambda x: x[1])
     return ek0, ek1, ek2
 
+def orderCheck(ek: list[tuple[int, int]])->list[tuple[int, int]]:
+    expected = 0
+    i = 0
+    duplicate = []
+    removed = False
+    while True:
+        try:
+            if ek[i][0] == expected:
+                removed = False
+                if duplicate!=[]:
+                    duplicate.append(ek[i-1])
+                    ek.pop(i-1)
+                    ek.insert(i-1, (duplicate[0][0], int(sum([d[1]/10 for d in duplicate])//len(duplicate))*10))
+                    duplicate = []
+                if expected == 3:
+                    expected = 0
+                else:
+                    expected +=1
+            elif i>0 and ek[i][0] == ek[i-1][0] and not removed:
+                duplicate.append(ek[i])
+                ek.pop(i)
+                i-=1
+            else:
+                removed = True
+                duplicate = []
+                popIdx = i-expected
+                for j in range(expected + int(ek[i][0]!=0)):
+                    ek.pop(popIdx)
+                i-=expected+1
+                expected = 0
+            i+=1
+        except:
+            break
+    while True:
+        try:
+            if ek[-1][0] != 3:
+                ek.pop(-1)
+            else:
+                break
+        except:
+            break        
+    return ek
 
 def splitGroup(
     data: pd.DataFrame,
@@ -290,33 +328,24 @@ def splitGroup(
     ek1: list[tuple[int, int]],
     ek2: list[tuple[int, int]],
 ) -> tuple[list[list[int]], list[int]]:
-    # print(ek0, ek1, ek2)
-    expected = 0
     features = []
     label = []
     pending = []
     for i in range(len(ek0)):
-        if ek0[i][0] == expected and ek1[i][0] == expected and ek2[i][0] == expected:
-            if expected == 0:
-                timeStart = ek0[i][1]
-            pending += [
-                ek0[i][1] - timeStart,
-                data["0"][ek0[i][1] // 10],
-                ek1[i][1] - timeStart,
-                data["1"][ek1[i][1] // 10],
-                ek2[i][1] - timeStart,
-                data["2"][ek2[i][1] // 10],
-            ]
-            if expected == 3:
-                features.append(pending)
-                label.append(data["gesture"][(features[-1][5] + timeStart) // 10])
-                pending = []
-                expected = 0
-            else:
-                expected = expected + 1
-        else:
+        if ek0[i][0] == 3:
+            timeStart = ek0[i-3][1]
             pending = []
-            expected = 0
+            for j in range(3, -1, -1):
+                pending+=[
+                ek0[i-j][1] - timeStart,
+                data["0"][ek0[i-j][1] // 10],
+                ek1[i-j][1] - timeStart,
+                data["1"][ek1[i-j][1] // 10],
+                ek2[i-j][1] - timeStart,
+                data["2"][ek2[i-j][1] // 10],
+                ]
+            features.append(pending)
+            label.append(data["gesture"][(features[-1][5] + timeStart) // 10])
     return features, label
 
 
@@ -329,15 +358,14 @@ def plot(data: pd.DataFrame, sensorNum: int, ekList: list[tuple[int, int]]):
 
 
 def plotAverage(allFeatures: list[list[float]], allLabel: list[int]):
-    allFeatures = [[0] + x for x in allFeatures]
-    colors = ["blue", "green", "red"]
+    colors = ["blue", "green", "red", "orange"]
     lineStyle = ["-", "--", ":"]
-    label = ["down", "up", "open"]
-    avg = [[0 for i in range(24)] for j in range(3)]
+    label = ["down", "up", "open", "little"]
+    avg = [[0 for i in range(24)] for j in range(4)]
     for i in range(len(allFeatures)):
         avg[allLabel[i]] = [avg[allLabel[i]][j] + allFeatures[i][j] for j in range(24)]
 
-    for i in range(3):
+    for i in range(4):
         avg[i] = [avg[i][j] / allLabel.count(i) for j in range(len(avg[i]))]
         for j in range(0, 6, 2):
             plt.plot(
@@ -392,7 +420,17 @@ def fullEKProcessing(allData=list[pd.DataFrame]) -> tuple[list[list[float]], lis
                 EKParameter(1, 180, 5, 3),
             ),
         )
-        ek0, ek1, ek2 = postprocess(ek0, ek1, ek2, 70, 70)
+        ek0 = removeDuplicate(ek0, 70)
+        ek1 = removeDuplicate(ek1, 70)
+        ek2 = removeDuplicate(ek2, 70)
+        ek0, ek1, ek2 = complement(ek0, ek1, ek2, 70)
+        # print(ek0, ek1, ek2)
+        ek0 = orderCheck(ek0)
+        ek1 = orderCheck(ek1)
+        ek2 = orderCheck(ek2)
+        # print(ek0, ek1, ek2)
+        ek0, ek1, ek2 = complement(ek0, ek1, ek2, 70)
+        # print(ek0, ek1, ek2)
         # plot(data, 0, ek0)
         # plot(data, 1, ek1)
         # plot(data, 2, ek2)
@@ -404,7 +442,7 @@ def fullEKProcessing(allData=list[pd.DataFrame]) -> tuple[list[list[float]], lis
 
 
 if __name__ == "__main__":
-    allData = loadRawDataFile("rick/raw_data/band4_0128", ["d-o2"])
+    allData, _ = loadRawDataFile("band2_0310")
     allFeatures, allLabel = fullEKProcessing(allData)
     plotAverage(allFeatures, allLabel)
     print(len(allFeatures), len(allLabel))

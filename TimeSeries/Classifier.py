@@ -111,14 +111,14 @@ if __name__ == "__main__":
     # trainFeatures, trainLabel = loadEKFolder(os.path.join(os.getcwd(), "Excel_data/v8/Time_series/rick/0127"))
     # trainFeatures = normalize(trainFeatures, 'greenpoint', calculateFlat('band4_flat'))
     for f in trainFile:
-        allData = loadRawDataFile(f[0])
+        allData, _ = loadRawDataFile(f[0])
         features, label = fullEKProcessing(allData)
         features = normalize(features, "flat", calculateFlat(f[1]))
         trainFeatures += features
         trainLabel += label
     print(len(trainFeatures))
     for f in testFile:
-        allData = loadRawDataFile(f[0])
+        allData, _ = loadRawDataFile(f[0])
         features, label = fullEKProcessing(allData)
         features = normalize(features, "flat", calculateFlat(f[1]))
         testFeatures += features

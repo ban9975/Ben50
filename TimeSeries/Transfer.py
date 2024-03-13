@@ -65,8 +65,8 @@ def plot(data: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    trainFile = DataParser.loadRawDataFile("band2_0115")
-    testFile = DataParser.loadRawDataFile("band4_0127")
+    trainFile, _ = DataParser.loadRawDataFile("band1_0310")
+    testFile, _ = DataParser.loadRawDataFile("band2_0310")
     linearTransform = findLinearTransform(findMaxMin(trainFile), findMaxMin(testFile))
     testFile = transformData(testFile, linearTransform)
     trainFeatures, trainLabel = fullEKProcessing(trainFile)

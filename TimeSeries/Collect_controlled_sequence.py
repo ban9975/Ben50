@@ -9,11 +9,12 @@ import time
 from openpyxl import *
 import os
 
-gestures = ["down", "up", "open"]
+gestures = ["down", "up", "open", "little"]
 title = ["gesture", "0", "1", "2"]
 nSensor = 3
 bt = BTController()
-bt.do_connect("COM12")
+# bt.do_connect("COM12")
+bt.do_connect("/dev/cu.H-C-2010-06-01")
 fileName = os.path.join(
     os.getcwd(), "Excel_data/v8/Time_series", f'{input("File name: ")}.xlsx'
 )
@@ -66,9 +67,8 @@ while True:
             data.append(btIn)
         data = [round(3000 * data[i] / (5000 - data[i] * 3), 2) for i in range(nSensor)]
         worksheet.cell(row=row, column=1, value=ges)
-        worksheet.cell(row=row, column=2, value=data[0])
-        worksheet.cell(row=row, column=3, value=data[1])
-        worksheet.cell(row=row, column=4, value=data[2])
+        for i in range(nSensor):
+            worksheet.cell(row=row, column=2+i, value=data[i])
         row += 1
         val = float(bt.read())
     print("stop")
