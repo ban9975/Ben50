@@ -1,7 +1,7 @@
 import pandas as pd
 import DataParser
 import matplotlib.pyplot as plt
-from ElbowKnee_all import *
+from ElbowKnee_all_nSensors import *
 from Classifier import *
 
 
@@ -65,14 +65,16 @@ def plot(data: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    trainFile, _ = DataParser.loadRawDataFile("band1_0310")
-    testFile, _ = DataParser.loadRawDataFile("band2_0310")
+    trainFile, _ = DataParser.loadRawDataFile("band5_0315")
+    testFile, _ = DataParser.loadRawDataFile("band5_0316")
     linearTransform = findLinearTransform(findMaxMin(trainFile), findMaxMin(testFile))
     testFile = transformData(testFile, linearTransform)
-    trainFeatures, trainLabel = fullEKProcessing(trainFile)
+    trainFeatures, trainLabel = fullFileProcessing(trainFile, 4)
     trainFeatures = normalize(trainFeatures)
-    print(len(trainFeatures))
-    testFeatures, testLabel = fullEKProcessing(testFile)
+    testFeatures, testLabel = fullFileProcessing(testFile, 4)
     testFeatures = normalize(testFeatures)
-    acc, accTest = randomForest(trainFeatures, trainLabel, testFeatures, testLabel)
+    print(len(trainFeatures), len(testFeatures))
+    print(trainLabel, testLabel)
+    classifier = Classifier()
+    acc, accTest = classifier.randomForest(trainFeatures, trainLabel, testFeatures, testLabel)
     print(acc, accTest)

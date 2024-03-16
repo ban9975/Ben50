@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from ElbowKnee_all import *
+from ElbowKnee_all_nSensors import *
 import openpyxl
 
 gestureDict = {"down": 0, "up": 1, "open": 2}

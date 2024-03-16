@@ -10,8 +10,8 @@ from openpyxl import *
 import os
 
 gestures = ["down", "up", "open", "little"]
-title = ["gesture", "0", "1", "2"]
-nSensor = 3
+title = ["gesture", "0", "1", "2", "3"]
+nSensor = 4
 bt = BTController()
 # bt.do_connect("COM12")
 bt.do_connect("/dev/cu.H-C-2010-06-01")

@@ -7,11 +7,12 @@ import csv
 
 
 class EKParameter:
-    def __init__(self, s: int, windowSize: int, overlapSize: int, threshold: int):
+    def __init__(self, s: int, windowSize: int, overlapSize: int, threshold: int, online:int = False):
         self.s = s
         self.windowSize = windowSize
         self.overlapSize = overlapSize
         self.threshold = threshold
+        self.online = online
 
 
 class EKGroupParameter:
@@ -120,8 +121,9 @@ def findEK(data: pd.DataFrame, sensorNum: int, parameters: EKGroupParameter):
             S=parameters.convexInc.s,
             curve="convex",
             direction="increasing",
+            online=parameters.convexInc.online
         )
-        if kneedle.knee != None:
+        if parameters.convexDec.online==True and len(kneedle.all_knees)==1 or parameters.convexDec.online==False and kneedle.knee != None:
             if kneedle.knee in convexInc:
                 convexInc[kneedle.knee] += 1
             else:
@@ -137,8 +139,9 @@ def findEK(data: pd.DataFrame, sensorNum: int, parameters: EKGroupParameter):
             S=parameters.concaveInc.s,
             curve="concave",
             direction="increasing",
+            online=parameters.concaveInc.online
         )
-        if kneedle.knee != None:
+        if parameters.convexDec.online==True and len(kneedle.all_knees)==1 or parameters.convexDec.online==False and kneedle.knee != None:
             if kneedle.knee in concaveInc:
                 concaveInc[kneedle.knee] += 1
             else:
@@ -154,8 +157,9 @@ def findEK(data: pd.DataFrame, sensorNum: int, parameters: EKGroupParameter):
             S=parameters.concaveDec.s,
             curve="concave",
             direction="decreasing",
+            online=parameters.concaveDec.online
         )
-        if kneedle.knee != None:
+        if parameters.convexDec.online==True and len(kneedle.all_knees)==1 or parameters.convexDec.online==False and kneedle.knee != None:
             if kneedle.knee in concaveDec:
                 concaveDec[kneedle.knee] += 1
             else:
@@ -171,8 +175,9 @@ def findEK(data: pd.DataFrame, sensorNum: int, parameters: EKGroupParameter):
             S=parameters.convexDec.s,
             curve="convex",
             direction="decreasing",
+            online=parameters.convexDec.online
         )
-        if kneedle.knee != None:
+        if parameters.convexDec.online==True and len(kneedle.all_knees)==1 or parameters.convexDec.online==False and kneedle.knee != None:
             if kneedle.knee in convexDec:
                 convexDec[kneedle.knee] += 1
             else:
@@ -345,7 +350,7 @@ def splitGroup(
                 data["2"][ek2[i-j][1] // 10],
                 ]
             features.append(pending)
-            label.append(data["gesture"][(features[-1][5] + timeStart) // 10])
+            label.append(data["gesture"][(features[-1][6] + timeStart) // 10])
     return features, label
 
 
@@ -380,69 +385,74 @@ def plotAverage(allFeatures: list[list[float]], allLabel: list[int]):
     plt.show()
 
 
-def fullEKProcessing(allData=list[pd.DataFrame]) -> tuple[list[list[float]], list[int]]:
+def fullEKProcessing(data: pd.DataFrame) -> tuple[list[float], int]:
+    ek0 = findEK(
+        data,
+        0,
+        EKGroupParameter(
+            35,
+            1,
+            EKParameter(1, 50, 5, 1),
+            EKParameter(1, 80, 5, 2),
+            EKParameter(1, 40, 5, 2),
+            EKParameter(2, 30, 3, 1, True),
+        ),
+    )
+    ek1 = findEK(
+        data,
+        1,
+        EKGroupParameter(
+            20,
+            1,
+            EKParameter(1, 40, 5, 1),
+            EKParameter(1, 50, 3, 3),
+            EKParameter(1, 50, 3, 2, True),
+            EKParameter(1, 20, 3, 1, True),
+        ),
+    )
+    ek2 = findEK(
+        data,
+        2,
+        EKGroupParameter(
+            20,
+            1,
+            EKParameter(1, 40, 5, 1),
+            EKParameter(1, 50, 3, 3),
+            EKParameter(1, 30, 3, 1, True),
+            EKParameter(1, 20, 2, 2, True),
+        ),
+    )
+    # plot(data, 0, ek0)
+    # plot(data, 1, ek1)
+    # plot(data, 2, ek2)
+    ek0 = removeDuplicate(ek0, 30)
+    ek1 = removeDuplicate(ek1, 30)
+    ek2 = removeDuplicate(ek2, 30)
+    # plot(data, 0, ek0)
+    # plot(data, 1, ek1)
+    # plot(data, 2, ek2)
+    ek0, ek1, ek2 = complement(ek0, ek1, ek2, 50)
+    # plot(data, 0, ek0)
+    # plot(data, 1, ek1)
+    # plot(data, 2, ek2)
+    ek0 = orderCheck(ek0)
+    ek1 = orderCheck(ek1)
+    ek2 = orderCheck(ek2)
+    ek0, ek1, ek2 = complement(ek0, ek1, ek2, 50)
+    features, label = splitGroup(data, ek0, ek1, ek2)
+    return features, label
+
+def fullFileProcessing(allData=list[pd.DataFrame]) -> tuple[list[list[float]], list[int]]:
     allFeatures = []
     allLabel = []
     for data in allData:
-        ek0 = findEK(
-            data,
-            0,
-            EKGroupParameter(
-                90,
-                2,
-                EKParameter(1, 250, 10, 1),
-                EKParameter(1, 300, 5, 2),
-                EKParameter(1, 300, 10, 3),
-                EKParameter(1, 150, 4, 6),
-            ),
-        )
-        ek1 = findEK(
-            data,
-            1,
-            EKGroupParameter(
-                40,
-                1,
-                EKParameter(1, 180, 10, 1),
-                EKParameter(1, 150, 6, 2),
-                EKParameter(1, 210, 7, 2),
-                EKParameter(1, 150, 6, 2),
-            ),
-        )
-        ek2 = findEK(
-            data,
-            2,
-            EKGroupParameter(
-                40,
-                1,
-                EKParameter(1, 180, 9, 1),
-                EKParameter(1, 150, 6, 2),
-                EKParameter(1, 140, 7, 2),
-                EKParameter(1, 180, 5, 3),
-            ),
-        )
-        ek0 = removeDuplicate(ek0, 70)
-        ek1 = removeDuplicate(ek1, 70)
-        ek2 = removeDuplicate(ek2, 70)
-        ek0, ek1, ek2 = complement(ek0, ek1, ek2, 70)
-        # print(ek0, ek1, ek2)
-        ek0 = orderCheck(ek0)
-        ek1 = orderCheck(ek1)
-        ek2 = orderCheck(ek2)
-        # print(ek0, ek1, ek2)
-        ek0, ek1, ek2 = complement(ek0, ek1, ek2, 70)
-        # print(ek0, ek1, ek2)
-        # plot(data, 0, ek0)
-        # plot(data, 1, ek1)
-        # plot(data, 2, ek2)
-        # plt.show()
-        features, label = splitGroup(data, ek0, ek1, ek2)
+        features, label = fullEKProcessing(data)
         allFeatures += features
         allLabel += label
     return allFeatures, allLabel
 
-
 if __name__ == "__main__":
-    allData, _ = loadRawDataFile("band2_0310")
-    allFeatures, allLabel = fullEKProcessing(allData)
+    allData, _ = loadRawDataFile("band2_0115")
+    allFeatures, allLabel = fullFileProcessing(allData)
     plotAverage(allFeatures, allLabel)
     print(len(allFeatures), len(allLabel))

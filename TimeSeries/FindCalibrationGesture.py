@@ -54,10 +54,12 @@ def plot(fileName: str, sheetName: str, data: pd.DataFrame, maxxTime: list[float
     plt.xlabel("time(ms)")
     plt.legend(loc="lower right")
     plt.show()
-fileNames = ["band1_0310", "band1_0311", "band2_0310", "band2_0311"]
-gestureSet = set()
-for file in fileNames:
-    gesture = findMaxMinGesture(file)
-    for g in gesture:
-        gestureSet.add(g)
-print(gestureSet)
+
+if __name__ == "__main__":
+    fileNames = ["band1_0310", "band1_0311", "band2_0310", "band2_0311"]
+    gestureSet = set()
+    for file in fileNames:
+        gesture = findMaxMinGesture(file)
+        for g in gesture:
+            gestureSet.add(g)
+    print(gestureSet)

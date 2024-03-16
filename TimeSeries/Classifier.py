@@ -1,7 +1,7 @@
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
-from ElbowKnee_all import *
+from ElbowKnee_all_nSensors import *
 from itertools import product
 from DataParser import *
 import os
@@ -17,74 +17,23 @@ def generateFeatureIndex() -> list[str]:
     print(index)
     return index
 
-
-def normalize(
-    features: list[list[float]], mode: str = "no", flat: list[float] = []
-) -> list[list[float]]:
-    for i in range(len(features)):
-        for j in range(0, 12, 2):
-            features[i][j] = (features[i][j]) / (features[i][10])
-        for j in range(12, 24, 2):
-            features[i][j] = (features[i][j] - features[i][12]) / (
-                features[i][22] - features[i][12]
-            )
-        if mode == "no":
-            continue
-        if mode == "flat":
-            for j in range(3):
-                for k in range(j * 2 + 1, len(features[i]), 6):
-                    features[i][k] = features[i][k] / flat[j]
-        elif mode == "greenpoint":
-            for j in range(3):
-                green = features[i][j * 2 + 1]
-                for k in range(j * 2 + 1, len(features[i]), 6):
-                    features[i][k] = features[i][k] / green
-    return features
-
-
-def calculateFlat(fileName: str) -> list[float]:
-    flat = []
-    xls = pd.ExcelFile(
-        os.path.join(os.getcwd(), "Excel_data/v8/Time_series", f"{fileName}.xlsx")
-    )
-    sheet = xls.parse(xls.sheet_names[0])
-    for colName in sheet.columns:
-        if colName != "gesture":
-            flat.append(sum(sheet[colName]) / len(sheet[colName]))
-    return flat
-
-
-def randomForest(
-    trainFeatures: list[list[float]],
-    trainLabel: list[int],
-    testFeatures: list[list[float]],
-    testLabel: list[int],
-) -> tuple[float]:
-    x_train, x_test, y_train, y_test = train_test_split(
-        trainFeatures, trainLabel, train_size=0.7, random_state=9999
-    )
-    model = RandomForestClassifier(
-        random_state=9999,
-    )
-    model.fit(x_train, y_train)
-    expected_train = y_test
-    actual_train = model.predict(x_test)
-    expected_test = testLabel
-    actual_test = model.predict(testFeatures)
-    acc = accuracy_score(expected_train, actual_train)
-    accTest = accuracy_score(expected_test, actual_test)
-    print(len(actual_test))
-    confusionMatrix(expected_test, actual_test)
-    print(actual_test)
-    return acc, accTest
-
-
 def confusionMatrix(expected, actual):
     test_matrix = confusion_matrix(expected, actual)
     disp = ConfusionMatrixDisplay(test_matrix)
     disp.plot()
     plt.show()
 
+def normalize(
+    features: list[list[float]],
+) -> list[list[float]]:
+    for i in range(len(features)):
+        for j in range(0, len(features[i])//2, 2):
+            features[i][j] = (features[i][j]) / (features[i][len(features[i])//4])
+        for j in range(len(features[i])//2, len(features[i]), 2):
+            features[i][j] = (features[i][j] - features[i][len(features[i])//2]) / (
+                features[i][len(features[i])//4*3] - features[i][len(features[i])//2]
+            )
+    return features
 
 def plotFeatures(features: list[float]):
     colors = ["orange", "green", "red"]
@@ -100,30 +49,34 @@ def plotFeatures(features: list[float]):
     plt.legend()
     plt.show()
 
+class Classifier:
+    def randomForest(
+        self, 
+        trainFeatures: list[list[float]],
+        trainLabel: list[int],
+        testFeatures: list[list[float]],
+        testLabel: list[int],
+    ) -> tuple[float]:
+        x_train, x_test, y_train, y_test = train_test_split(
+            trainFeatures, trainLabel, train_size=0.7, random_state=9999
+        )
+        self.model = RandomForestClassifier(
+            random_state=9999,
+        )
+        self.model.fit(x_train, y_train)
+        expected_train = y_test
+        actual_train = self.model.predict(x_test)
+        expected_test = testLabel
+        actual_test = self.model.predict(testFeatures)
+        acc = accuracy_score(expected_train, actual_train)
+        accTest = accuracy_score(expected_test, actual_test)
+        print(len(actual_test))
+        print(expected_test, actual_test)
+        # confusionMatrix(expected_test, actual_test)
+        # print(actual_test),
+        return acc, accTest
 
-if __name__ == "__main__":
-    trainFeatures = []
-    trainLabel = []
-    testFeatures = []
-    testLabel = []
-    trainFile = [("band2_0115", "band2_flat")]
-    testFile = [("band1_0126", "band1_flat")]
-    # trainFeatures, trainLabel = loadEKFolder(os.path.join(os.getcwd(), "Excel_data/v8/Time_series/rick/0127"))
-    # trainFeatures = normalize(trainFeatures, 'greenpoint', calculateFlat('band4_flat'))
-    for f in trainFile:
-        allData, _ = loadRawDataFile(f[0])
-        features, label = fullEKProcessing(allData)
-        features = normalize(features, "flat", calculateFlat(f[1]))
-        trainFeatures += features
-        trainLabel += label
-    print(len(trainFeatures))
-    for f in testFile:
-        allData, _ = loadRawDataFile(f[0])
-        features, label = fullEKProcessing(allData)
-        features = normalize(features, "flat", calculateFlat(f[1]))
-        testFeatures += features
-        testLabel += label
-    # testFeatures, testLabel = loadEKFolder(os.path.join(os.getcwd(), "Excel_data/v8/Time_series/rick/0127"))
-    # testFeatures = normalize(testFeatures, 'greenpoint', calculateFlat('band4_flat'))
-    acc, accTest = randomForest(trainFeatures, trainLabel, testFeatures, testLabel)
-    print(acc, accTest)
+    def predict(self, features: list[float]):
+        features = normalize(features)
+        return self.model.predict(features)
+

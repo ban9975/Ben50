@@ -1,4 +1,4 @@
-from kneed import KneeLocator
+from ElbowKnee_all_nSensors import *
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
@@ -12,7 +12,7 @@ def smooth(y, window_length):
 
 # fileName = input("File name: ")
 # fileName = 'band1_222_1130'
-fileName = "band2_0115"
+fileName = "band2_0315"
 xls = pd.ExcelFile(
     os.path.join(os.getcwd(), "Excel_data/v8/Time_series", f"{fileName}.xlsx")
 )
@@ -21,29 +21,49 @@ saveFolder = os.path.join(
 )
 if not os.path.exists(saveFolder):
     os.mkdir(saveFolder)
-sheetName = '00_51'
+sheetName = '0123_5'
 data = xls.parse(sheetName)
-col = "1"
-t = [i * 10 for i in range(len(data[col]))]
-plt.plot(t, data[col])
-data[col] = smooth(data[col], 40)
-plt.ylim(500,1200)
-concaveInc = {}
-for i in range(0, len(data[col]) - 200, 5):
-    kneedle = KneeLocator(
-        t[i : i + 200],
-        data[col][i : i + 200],
-        S=1,
-        curve="concave",
-        direction="increasing",
-    )
-    if kneedle.knee != None:
-        if kneedle.knee in concaveInc:
-            concaveInc[kneedle.knee] += 1
-        else:
-            concaveInc[kneedle.knee] = 1
-for c in concaveInc:
-    if concaveInc[c] > 2:
-        plt.vlines(c, 500, 1200, colors=["r"])
+data = data.iloc[2000:5000].reset_index(drop=True)
+
+plt.ylim(500,3000)
+# ek0 = findEK(
+#     data,
+#     0,
+#     EKGroupParameter(
+#         35,
+#         1,
+#         EKParameter(1, 50, 5, 1),
+#         EKParameter(1, 80, 5, 2),
+#         EKParameter(1, 40, 5, 2),
+#         EKParameter(2, 30, 3, 1, True),
+#     ),
+# )
+# plot(data, 0, ek0)
+ek1 = findEK(
+    data,
+    1,
+    EKGroupParameter(
+        50,
+        1,
+        EKParameter(1, 40, 3, 2),
+        EKParameter(1, 50, 3, 2),
+        EKParameter(1, 60, 3, 3, False),
+        EKParameter(1, 50, 3, 4, False),
+    ),
+)
+plot(data, 1, ek1)
+# ek2 = findEK(
+#     data,
+#     2,
+#     EKGroupParameter(
+#         20,
+#         1,
+#         EKParameter(1, 40, 5, 1),
+#         EKParameter(1, 50, 3, 3),
+#         EKParameter(1, 30, 3, 1, True),
+#         EKParameter(1, 20, 2, 2, True),
+#     ),
+# )
+# plot(data, 2, ek2)
 plt.title(sheetName)
 plt.show()
