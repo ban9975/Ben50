@@ -65,13 +65,13 @@ def plot(data: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    trainFile, _ = DataParser.loadRawDataFile("band5_0315")
-    testFile, _ = DataParser.loadRawDataFile("band5_0316")
+    trainFile, _ = DataParser.loadRawDataFile("band2_0315")
+    testFile, _ = DataParser.loadRawDataFile("band1_0315")
     linearTransform = findLinearTransform(findMaxMin(trainFile), findMaxMin(testFile))
     testFile = transformData(testFile, linearTransform)
-    trainFeatures, trainLabel = fullFileProcessing(trainFile, 4)
+    trainFeatures, trainLabel = fullFileProcessing(trainFile, 3)
     trainFeatures = normalize(trainFeatures)
-    testFeatures, testLabel = fullFileProcessing(testFile, 4)
+    testFeatures, testLabel = fullFileProcessing(testFile, 3)
     testFeatures = normalize(testFeatures)
     print(len(trainFeatures), len(testFeatures))
     print(trainLabel, testLabel)

@@ -307,8 +307,8 @@ def fullFileProcessing(allData:list[pd.DataFrame], nSensors: int) -> tuple[list[
             1,
             EKParameter(1, 180, 10, 1),
             EKParameter(1, 150, 6, 2),
-            EKParameter(1, 210, 7, 2),
-            EKParameter(1, 150, 6, 2),
+            EKParameter(1, 210, 7, 4),
+            EKParameter(1, 180, 6, 3),
         ),
     ], 70, 70)
     for data in allData:
@@ -318,6 +318,6 @@ def fullFileProcessing(allData:list[pd.DataFrame], nSensors: int) -> tuple[list[
     return allFeatures, allLabel
 
 if __name__ == "__main__":
-    allData, _ = loadRawDataFile("band2_0315")
-    allFeatures, allLabel = fullFileProcessing(allData, 3)
+    allData, _ = loadRawDataFile("band5_0315")
+    allFeatures, allLabel = fullFileProcessing(allData, 4)
     print(len(allFeatures), len(allLabel))

@@ -70,9 +70,7 @@ class Classifier:
         actual_test = self.model.predict(testFeatures)
         acc = accuracy_score(expected_train, actual_train)
         accTest = accuracy_score(expected_test, actual_test)
-        print(len(actual_test))
-        print(expected_test, actual_test)
-        # confusionMatrix(expected_test, actual_test)
+        confusionMatrix(expected_test, actual_test)
         # print(actual_test),
         return acc, accTest
 

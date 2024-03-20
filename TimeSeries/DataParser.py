@@ -1,6 +1,5 @@
 import pandas as pd
 import os
-from ElbowKnee_all_nSensors import *
 import openpyxl
 
 gestureDict = {"down": 0, "up": 1, "open": 2}
@@ -37,7 +36,6 @@ def translateRawData(fileName: str):
 
 
 if __name__ == "__main__":
-    # exportEKFile('band2_0115', 'band2_0115_processed')
     translateRawData(
         os.path.join(
             os.getcwd(), "Excel_data/v8/Time_series/rick/raw_data/band4_0128.xlsx"
