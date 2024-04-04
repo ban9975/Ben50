@@ -65,8 +65,8 @@ def plot(data: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    trainFile, _ = DataParser.loadRawDataFile("band2_0315")
-    testFile, _ = DataParser.loadRawDataFile("band1_0315")
+    trainFile, _ = DataParser.loadRawDataFile("band2_0322")
+    testFile, _ = DataParser.loadRawDataFile("band1_0322")
     linearTransform = findLinearTransform(findMaxMin(trainFile), findMaxMin(testFile))
     testFile = transformData(testFile, linearTransform)
     trainFeatures, trainLabel = fullFileProcessing(trainFile, 3)

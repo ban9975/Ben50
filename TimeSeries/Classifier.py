@@ -4,7 +4,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDis
 from ElbowKnee_all_nSensors import *
 from itertools import product
 from DataParser import *
-import os
+import joblib
 
 
 def generateFeatureIndex() -> list[str]:
@@ -77,4 +77,10 @@ class Classifier:
     def predict(self, features: list[float]):
         features = normalize(features)
         return self.model.predict(features)
+    
+    def saveModel(self, path:str):
+        joblib.dump(self.model, os.path.join(os.getcwd(), 'Model', path))
+
+    def loadModel(self, path: str):
+        self.model = joblib.load(os.path.join(os.getcwd(), 'Model', path))
 

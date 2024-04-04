@@ -257,20 +257,28 @@ def plot(data: pd.DataFrame, sensorNum: int, ekList: list[tuple[int, int]]):
     for ek in ekList:
         plt.plot(ek[1], data[col][ek[1] // 10], color[ek[0]])
 
-def EKProcessing(data: pd.DataFrame, nSensors: int, ekGroupParameters: tuple[list[EKGroupParameter], int, int]) -> tuple[list[float], int]:
+def EKProcessing(data: pd.DataFrame, nSensors: int, ekGroupParameters: tuple[list[EKGroupParameter], int, int]) -> tuple[list[list[int]], list[int], list[list[tuple[int, int]]]]:
     ekLists = []
     for i in range(nSensors):
         ekLists.append(findEK(data, i, ekGroupParameters[0][i]))
+    for i in range(len(ekLists)):
+        plot(data, i, ekLists[i])
+    plt.show()
     for i in range(nSensors):
         ekLists[i] = removeDuplicate(ekLists[i], ekGroupParameters[1])
-
+    for i in range(len(ekLists)):
+        plot(data, i, ekLists[i])
+    plt.show()
     ekLists = complement(ekLists, ekGroupParameters[2])
+    for i in range(len(ekLists)):
+        plot(data, i, ekLists[i])
+    plt.show()
     for i in range(nSensors):
         ekLists[i] = orderCheck(ekLists[i])
     ekLists = complement(ekLists, ekGroupParameters[2])
-    # for i in range(len(ekLists)):
-    #     plot(data, i, ekLists[i])
-    # plt.show()
+    for i in range(len(ekLists)):
+        plot(data, i, ekLists[i])
+    plt.show()
     features, label = splitGroup(data, ekLists)
     return features, label, ekLists
 
@@ -313,11 +321,13 @@ def fullFileProcessing(allData:list[pd.DataFrame], nSensors: int) -> tuple[list[
     ], 70, 70)
     for data in allData:
         features, label, _ = EKProcessing(data, nSensors, ekGroupParameters)
-        allFeatures += features
-        allLabel += label
+        for i, group in enumerate(features):
+            if label[i] != -1:
+                allFeatures.append(group)
+                allLabel.append(label[i])
     return allFeatures, allLabel
 
 if __name__ == "__main__":
-    allData, _ = loadRawDataFile("band5_0315")
-    allFeatures, allLabel = fullFileProcessing(allData, 4)
+    allData, _ = loadRawDataFile("band2_0310")
+    allFeatures, allLabel = fullFileProcessing(allData, 3)
     print(len(allFeatures), len(allLabel))

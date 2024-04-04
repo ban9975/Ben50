@@ -6,7 +6,7 @@ SoftwareSerial BTSerial(8, 9);
 ADS1015 ads(0X48);
 bool start = false;
 unsigned int anaIn;
-const int nSensor=4;
+const int nSensor=3;
 int32_t btRead = 0;
 int16_t adc[4];
 void setup() {
