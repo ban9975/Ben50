@@ -1,3 +1,9 @@
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
 from kneed import KneeLocator
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -276,23 +282,88 @@ def orderCheck(ek: list[tuple[int, int]]) -> list[tuple[int, int]]:
 def splitGroup(
     data: pd.DataFrame, ekLists: list[list[tuple[int, int]]]
 ) -> tuple[list[list[int]], list[int]]:
+    # features = []
+    # label = []
+    # pending = []
+    # for i in range(0, len(ekLists[0]), 4):
+    #     timeStart = ekLists[0][i][1]
+    #     pending = []
+    #     for j in range(4):
+    #         for k in range(len(ekLists)):
+    #             pending += [
+    #                 ekLists[k][i + j][1] - timeStart,
+    #                 data[str(k)][ekLists[k][i + j][1] // 10],
+    #             ]
+    #     features.append(pending)
+    #     label.append(
+    #         data["gesture"][(features[-1][len(ekLists) * 2] + timeStart) // 10]
+    #     )
+    # return features, label
+    expected = 0
     features = []
     label = []
     pending = []
-    for i in range(0, len(ekLists[0]), 4):
-        timeStart = ekLists[0][i][1]
-        pending = []
-        for j in range(4):
-            for k in range(len(ekLists)):
-                pending += [
-                    ekLists[k][i + j][1] - timeStart,
-                    data[str(k)][ekLists[k][i + j][1] // 10],
-                ]
-        features.append(pending)
-        label.append(
-            data["gesture"][(features[-1][len(ekLists) * 2] + timeStart) // 10]
-        )
-    return features, label
+    groups = []
+    labelPoints = []
+    for s in range(len(ekLists)):
+        group = []
+        expected = 0
+        for i in range(len(ekLists[s])):
+            if ekLists[s][i][0] == expected:
+                if expected == 0:
+                    timeStart = ekLists[s][i][1]
+                if expected == 3:
+                    expected = 0
+                    group.append(timeStart)
+                    if s == 0:
+                        labelPoints.append(ekLists[s][i - 2][1])
+                else:
+                    expected = expected + 1
+            else:
+                expected = 0
+        groups.append(group)
+
+    count = 0
+    for i in range(len(groups[0])):
+        t1 = False
+        t2 = False
+        for t in range(groups[0][i] - 700, groups[0][i] + 700):
+            if t in groups[1]:
+                t1 = True
+            if t in groups[2]:
+                t2 = True
+            if t1 and t2 and data["gesture"][labelPoints[i] // 10] != -1:
+                count += 1
+                break
+    # print(count)
+
+    # for i in range(len(ekLists[0])):
+    #     if (
+    #         ekLists[0][i][0] == expected
+    #         and ekLists[1][i][0] == expected
+    #         and ekLists[2][i][0] == expected
+    #     ):
+    #         if expected == 0:
+    #             timeStart = ekLists[0][i][1]
+    #         pending += [
+    #             ekLists[0][i][1] - timeStart,
+    #             data["0"][ekLists[0][i][1] // 10],
+    #             ekLists[1][i][1] - timeStart,
+    #             data["1"][ekLists[1][i][1] // 10],
+    #             ekLists[2][i][1] - timeStart,
+    #             data["2"][ekLists[2][i][1] // 10],
+    #         ]
+    #         if expected == 3:
+    #             features.append(pending[1:])
+    #             label.append(data["gesture"][(features[-1][5] + timeStart) // 10])
+    #             pending = []
+    #             expected = 0
+    #         else:
+    #             expected = expected + 1
+    #     else:
+    #         pending = []
+    #         expected = 0
+    return count
 
 
 def plot(data: pd.DataFrame, sensorNum: int, ekList: list[tuple[int, int]]):
@@ -316,12 +387,14 @@ def EKProcessing(
     ekLists = complement(ekLists, ekGroupParameters[2])
     for i in range(nSensors):
         ekLists[i] = orderCheck(ekLists[i])
-    ekLists = complement(ekLists, ekGroupParameters[2])
+    # for i in range(nSensors):
+    #     print(len(ekLists[i]))
+    # ekLists = complement(ekLists, ekGroupParameters[2])
     # for i in range(len(ekLists)):
     #     plot(data, i, ekLists[i])
     # plt.show()
-    features, label = splitGroup(data, ekLists)
-    return features, label, ekLists
+    count = splitGroup(data, ekLists)
+    return count, ekLists
 
 
 def fullFileProcessing(
@@ -367,16 +440,18 @@ def fullFileProcessing(
         70,
         70,
     )
+    allCount = 0
     for data in allData:
-        features, label, _ = EKProcessing(data, nSensors, ekGroupParameters)
-        for i, group in enumerate(features):
-            if label[i] != -1:
-                allFeatures.append(group)
-                allLabel.append(label[i])
-    return allFeatures, allLabel
+        count, _ = EKProcessing(data, nSensors, ekGroupParameters)
+        # for i, group in enumerate(features):
+        #     if label[i] != -1:
+        #         allFeatures.append(group)
+        #         allLabel.append(label[i])
+        allCount += count
+    return allCount
 
 
 if __name__ == "__main__":
-    allData, _ = loadRawDataFile("band2_0115")
-    allFeatures, allLabel = fullFileProcessing(allData, 3)
-    print(len(allFeatures), len(allLabel))
+    allData, _ = loadRawDataFile("band4_0128")
+    allCount = fullFileProcessing(allData, 3)
+    print(allCount)

@@ -3,6 +3,7 @@ import DataParser
 import matplotlib.pyplot as plt
 from ElbowKnee_all_nSensors import *
 from Classifier import *
+from DataPartition import *
 
 
 def findMaxMin(allData: list[pd.DataFrame]) -> list[tuple[float, float]]:
@@ -44,7 +45,7 @@ def transformData(
     return allData
 
 
-def plot(data: pd.DataFrame):
+def plot(data: pd.DataFrame, title: str = ""):
     plt.figure()
     plt.ylim(500, 3200)
     for col in data.columns:
@@ -61,20 +62,52 @@ def plot(data: pd.DataFrame):
     plt.ylabel("resistance(ohm)")
     plt.xlabel("time(ms)")
     plt.legend(loc="upper right")
+    plt.title(title)
     plt.show()
 
 
-if __name__ == "__main__":
-    trainFile, _ = DataParser.loadRawDataFile("band2_0322")
-    testFile, _ = DataParser.loadRawDataFile("band1_0322")
-    linearTransform = findLinearTransform(findMaxMin(trainFile), findMaxMin(testFile))
+def transfer(
+    trainFile: list[pd.DataFrame],
+    testFile: list[pd.DataFrame],
+    calibrationFile: list[pd.DataFrame],
+) -> list[pd.DataFrame]:
+    linearTransform = findLinearTransform(
+        findMaxMin(trainFile), findMaxMin(calibrationFile)
+    )
     testFile = transformData(testFile, linearTransform)
+    return testFile
+
+
+if __name__ == "__main__":
+    trainFileName = "band2_0115"
+    testFileName = "band2_0126"
+    trainFile, _ = DataParser.loadRawDataFile(trainFileName)
+    plot(trainFile[0], "Training data")
+    tmpFile, sheetNames = DataParser.loadRawDataFile(testFileName)
+    testFile = []
+    calibrationFile = []
+    for i, sheet in enumerate(tmpFile):
+        if "12" in sheetNames[i]:
+            test, calibration = dataPartition(sheet, 0.7)
+        else:
+            calibration, test = dataPartition(sheet, 0.3)
+        testFile.append(test)
+        calibrationFile.append(calibration)
+    plot(testFile[0], "Original testing data")
+    testFile = transfer(trainFile, tmpFile, tmpFile)
+    plot(testFile[0], "Transformed testing data")
     trainFeatures, trainLabel = fullFileProcessing(trainFile, 3)
     trainFeatures = normalize(trainFeatures)
     testFeatures, testLabel = fullFileProcessing(testFile, 3)
     testFeatures = normalize(testFeatures)
+
     print(len(trainFeatures), len(testFeatures))
-    print(trainLabel, testLabel)
     classifier = Classifier()
-    acc, accTest = classifier.randomForest(trainFeatures, trainLabel, testFeatures, testLabel)
+    acc, accTest = classifier.randomForest(
+        trainFeatures,
+        trainLabel,
+        testFeatures,
+        testLabel,
+        # f"{trainFileName}_{testFileName}_4_gestures",
+    )
     print(acc, accTest)

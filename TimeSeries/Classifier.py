@@ -14,26 +14,42 @@ def generateFeatureIndex() -> list[str]:
     index = []
     for permutation in list(product(color, sensor, type)):
         index.append(permutation[0] + permutation[1] + permutation[2])
-    print(index)
     return index
 
-def confusionMatrix(expected, actual):
+
+def confusionMatrix(expected, actual, title=""):
     test_matrix = confusion_matrix(expected, actual)
     disp = ConfusionMatrixDisplay(test_matrix)
     disp.plot()
-    plt.show()
+    if title != "":
+        plt.title(title)
+        plt.savefig(
+            os.path.join(
+                os.getcwd(),
+                "../Sensys 2024",
+                f"{title}.png",
+            )
+        )
+        plt.close()
+    else:
+        plt.show()
+
 
 def normalize(
     features: list[list[float]],
 ) -> list[list[float]]:
     for i in range(len(features)):
-        for j in range(0, len(features[i])//2, 2):
-            features[i][j] = (features[i][j]) / (features[i][len(features[i])//4])
-        for j in range(len(features[i])//2, len(features[i]), 2):
-            features[i][j] = (features[i][j] - features[i][len(features[i])//2]) / (
-                features[i][len(features[i])//4*3] - features[i][len(features[i])//2]
-            )
+        r0t = features[i][len(features[i]) // 4]
+        for j in range(0, len(features[i]) // 2, 2):
+            features[i][j] = (features[i][j]) / r0t
+        byRange = (
+            features[i][len(features[i]) // 4 * 3] - features[i][len(features[i]) // 2]
+        )
+        b0t = features[i][len(features[i]) // 2]
+        for j in range(len(features[i]) // 2, len(features[i]), 2):
+            features[i][j] = (features[i][j] - b0t) / byRange
     return features
+
 
 def plotFeatures(features: list[float]):
     colors = ["orange", "green", "red"]
@@ -49,13 +65,15 @@ def plotFeatures(features: list[float]):
     plt.legend()
     plt.show()
 
+
 class Classifier:
     def randomForest(
-        self, 
+        self,
         trainFeatures: list[list[float]],
         trainLabel: list[int],
         testFeatures: list[list[float]],
         testLabel: list[int],
+        title: str = "",
     ) -> tuple[float]:
         x_train, x_test, y_train, y_test = train_test_split(
             trainFeatures, trainLabel, train_size=0.7, random_state=9999
@@ -70,17 +88,16 @@ class Classifier:
         actual_test = self.model.predict(testFeatures)
         acc = accuracy_score(expected_train, actual_train)
         accTest = accuracy_score(expected_test, actual_test)
-        confusionMatrix(expected_test, actual_test)
+        confusionMatrix(expected_test, actual_test, title)
         # print(actual_test),
         return acc, accTest
 
     def predict(self, features: list[float]):
         features = normalize(features)
         return self.model.predict(features)
-    
-    def saveModel(self, path:str):
-        joblib.dump(self.model, os.path.join(os.getcwd(), 'Model', path))
+
+    def saveModel(self, path: str):
+        joblib.dump(self.model, os.path.join(os.getcwd(), "Model", path))
 
     def loadModel(self, path: str):
-        self.model = joblib.load(os.path.join(os.getcwd(), 'Model', path))
-
+        self.model = joblib.load(os.path.join(os.getcwd(), "Model", path))
