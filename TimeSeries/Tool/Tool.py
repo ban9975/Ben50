@@ -183,7 +183,9 @@ class CollectPage(QWidget):
         self.worker = CollectWorker(self.dataCollector, fileName, sequence, iteration)
         self.worker.gestureSignal.connect(
             lambda gesture: self.setFig(
-                os.path.join(config["Store_Path"]["gesture_fig_path"], f"{gesture}.png")
+                os.path.join(
+                    basedir, config["Store_Path"]["gesture_fig_path"], f"{gesture}.png"
+                )
             )
         )
         self.worker.finishSignal.connect(
