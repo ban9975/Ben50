@@ -5,13 +5,13 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 from DataParser import *
-from Transfer import plot, normalize, Classifier
+from Classifier import *
 from ElbowKnee_all_nSensors import fullFileProcessing
 from DataPartition import *
 
 if __name__ == "__main__":
     trainFileName = "band2_0126"
-    trainFile, _ = loadRawDataFile(trainFileName)
+    trainFile, _ = loadRawDataFile(getDefaultFilePath(trainFileName))
     trainFile, testFile = fullFileDataPartition(trainFile, 0.6)
     trainFeatures, trainLabel = fullFileProcessing(trainFile, 3)
     trainFeatures = normalize(trainFeatures)
@@ -41,7 +41,16 @@ if __name__ == "__main__":
             trainLabel,
             newTestFeatures,
             testLabel,
+        )
+        classifier.confusionMatrix(
+            classifier.expected_test,
+            classifier.actual_test,
             f"{trainFileName}_{part[0]}",
+            os.path.join(
+                os.getcwd(),
+                "../Sensys 2024",
+                f"{trainFileName}_{part[0]}.png",
+            ),
         )
         print(part[0], acc, accTest)
     parts = [("only_time", 0), ("only_resistance", 1)]
@@ -58,6 +67,15 @@ if __name__ == "__main__":
             trainLabel,
             newTestFeatures,
             testLabel,
+        )
+        classifier.confusionMatrix(
+            classifier.expected_test,
+            classifier.actual_test,
             f"{trainFileName}_{part[0]}",
+            os.path.join(
+                os.getcwd(),
+                "../Sensys 2024",
+                f"{trainFileName}_{part[0]}.png",
+            ),
         )
         print(part[0], acc, accTest)

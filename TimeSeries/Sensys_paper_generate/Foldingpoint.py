@@ -452,6 +452,6 @@ def fullFileProcessing(
 
 
 if __name__ == "__main__":
-    allData, _ = loadRawDataFile("band4_0128")
+    allData, _ = loadRawDataFile(getDefaultFilePath("band4_0128"))
     allCount = fullFileProcessing(allData, 3)
     print(allCount)

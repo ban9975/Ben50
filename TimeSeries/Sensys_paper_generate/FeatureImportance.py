@@ -8,7 +8,7 @@ from sklearn.inspection import permutation_importance
 from DataParser import *
 from Transfer import *
 from ElbowKnee_all_nSensors import *
-from Sensys_paper_generate.Calibration import *
+from CalibrationCompare import *
 
 if __name__ == "__main__":
     trainFileName = "band2_0115"

@@ -5,11 +5,15 @@ import openpyxl
 gestureDict = {"down": 0, "up": 1, "open": 2}
 
 
-def loadRawDataFile(fileName: str, sheetName: list[str] = []) -> tuple[list[pd.DataFrame], list[str]]:
+def getDefaultFilePath(fileName: str):
+    return os.path.join(os.getcwd(), "Excel_data/v8/Time_series", f"{fileName}.xlsx")
+
+
+def loadRawDataFile(
+    fileName: str, sheetName: list[str] = []
+) -> tuple[list[pd.DataFrame], list[str]]:
     data = []
-    xls = pd.ExcelFile(
-        os.path.join(os.getcwd(), "Excel_data/v8/Time_series", f"{fileName}.xlsx")
-    )
+    xls = pd.ExcelFile(fileName)
     if sheetName == []:
         sheetName = xls.sheet_names
     for name in sheetName:

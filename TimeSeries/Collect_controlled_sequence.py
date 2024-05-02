@@ -38,14 +38,14 @@ while True:
     for i in range(iter):
         for s in seq:
             gestureList.append(int(s))
-    t = str(len(gestureList)*4+2)
+    t = str(len(gestureList) * 4 + 2)
     bt.write(t)
     section = 1
     ges = -1  # neutral
     j = 0
     print("neutral")
     val = float(bt.read())
-    start = time.time()    
+    start = time.time()
     while val != 2048:
         # print(time.time(), start)
         if time.time() - start > 2:
@@ -68,10 +68,10 @@ while True:
         data = [round(3000 * data[i] / (5000 - data[i] * 3), 2) for i in range(nSensor)]
         worksheet.cell(row=row, column=1, value=ges)
         for i in range(nSensor):
-            worksheet.cell(row=row, column=2+i, value=data[i])
+            worksheet.cell(row=row, column=2 + i, value=data[i])
         row += 1
         val = float(bt.read())
     print("stop")
-    if 'Sheet' in workbook.sheetnames:
-        workbook.remove(workbook['Sheet'])
+    if "Sheet" in workbook.sheetnames:
+        workbook.remove(workbook["Sheet"])
     workbook.save(fileName)

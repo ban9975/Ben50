@@ -7,7 +7,7 @@ sys.path.append(parent_dir)
 from DataParser import *
 from Transfer import *
 from ElbowKnee_all_nSensors import *
-from Sensys_paper_generate.Calibration import *
+from CalibrationCompare import *
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 

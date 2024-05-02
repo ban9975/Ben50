@@ -17,24 +17,6 @@ def generateFeatureIndex() -> list[str]:
     return index
 
 
-def confusionMatrix(expected, actual, title=""):
-    test_matrix = confusion_matrix(expected, actual)
-    disp = ConfusionMatrixDisplay(test_matrix)
-    disp.plot()
-    if title != "":
-        plt.title(title)
-        plt.savefig(
-            os.path.join(
-                os.getcwd(),
-                "../Sensys 2024",
-                f"{title}.png",
-            )
-        )
-        plt.close()
-    else:
-        plt.show()
-
-
 def normalize(
     features: list[list[float]],
 ) -> list[list[float]]:
@@ -73,7 +55,6 @@ class Classifier:
         trainLabel: list[int],
         testFeatures: list[list[float]],
         testLabel: list[int],
-        title: str = "",
     ) -> tuple[float]:
         x_train, x_test, y_train, y_test = train_test_split(
             trainFeatures, trainLabel, train_size=0.7, random_state=9999
@@ -82,14 +63,12 @@ class Classifier:
             random_state=9999,
         )
         self.model.fit(x_train, y_train)
-        expected_train = y_test
-        actual_train = self.model.predict(x_test)
-        expected_test = testLabel
-        actual_test = self.model.predict(testFeatures)
-        acc = accuracy_score(expected_train, actual_train)
-        accTest = accuracy_score(expected_test, actual_test)
-        confusionMatrix(expected_test, actual_test, title)
-        # print(actual_test),
+        self.expected_train = y_test
+        self.actual_train = self.model.predict(x_test)
+        self.expected_test = testLabel
+        self.actual_test = self.model.predict(testFeatures)
+        acc = accuracy_score(self.expected_train, self.actual_train)
+        accTest = accuracy_score(self.expected_test, self.actual_test)
         return acc, accTest
 
     def predict(self, features: list[float]):
@@ -101,3 +80,14 @@ class Classifier:
 
     def loadModel(self, path: str):
         self.model = joblib.load(os.path.join(os.getcwd(), "Model", path))
+
+    def confusionMatrix(self, expected, actual, title="", path=""):
+        test_matrix = confusion_matrix(expected, actual)
+        disp = ConfusionMatrixDisplay(test_matrix)
+        disp.plot()
+        plt.title(title)
+        if path != "":
+            plt.savefig(path)
+            plt.close()
+        else:
+            plt.show()
