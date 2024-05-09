@@ -7,9 +7,10 @@ from PyQt5.QtGui import *
 import time
 from Constants import *
 from BTController import *
-from DataCollector import DataCollector
+from DataCollector import *
 from Components import *
 from CalibrationClassifier import *
+from Plotter import *
 
 
 class Tool(QMainWindow):
@@ -17,6 +18,7 @@ class Tool(QMainWindow):
         super().__init__()
         self.dataCollector = DataCollector()
         self.calibrationClassifier = CalibrationClassifier()
+        self.plotter = Plotter()
         self.widget = QWidget()
         self.layout = QVBoxLayout(self.widget)
         self.btWidget = QWidget()
@@ -33,9 +35,10 @@ class Tool(QMainWindow):
         self.tab = QTabWidget()
         self.tab.addTab(TrainPage(self.calibrationClassifier), "Train")
         self.tab.addTab(CollectPage(self.dataCollector), "Collect")
+        self.tab.addTab(PlotPage(self.plotter), "Plot")
         self.layout.addWidget(self.tab)
         self.setCentralWidget(self.widget)
-        self.setFixedSize(1500, 750)
+        self.setFixedSize(1500, 800)
         self.show()
 
     def connectBT(self):
@@ -65,8 +68,10 @@ class TrainPage(QWidget):
         )
         self.mode = QComboBox()
         self.mode.addItems(calibrationModes)
-        self.runBtn = QPushButton("Run")
-        self.runBtn.clicked.connect(self.run)
+        self.trainBtn = QPushButton("Train")
+        self.trainBtn.clicked.connect(self.run)
+        self.trainAllBtn = QPushButton("Train all calibration modes")
+        self.trainAllBtn.clicked.connect(self.trainAll)
         self.resultLabel = QLabel()
         self.resultLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.resultFig = QLabel()
@@ -76,7 +81,8 @@ class TrainPage(QWidget):
         self.layout.addWidget(self.testFile, 2, 0, 1, 4)
         self.layout.addWidget(self.testFlatFile, 3, 0, 1, 4)
         self.layout.addWidget(self.mode, 4, 1, 1, 1)
-        self.layout.addWidget(self.runBtn, 4, 2, 1, 1)
+        self.layout.addWidget(self.trainBtn, 4, 2, 1, 1)
+        self.layout.addWidget(self.trainAllBtn, 4, 3, 1, 1)
         self.layout.addWidget(self.resultLabel, 5, 0, 1, 3)
         self.layout.addWidget(self.resultFig, 5, 3, 2, 1)
 
@@ -111,8 +117,40 @@ class TrainPage(QWidget):
         self.thread.started.connect(self.worker.work)
         self.thread.start()
 
+    def trainAll(self):
+        self.disableBtns(True)
+        self.thread = QThread()
+        self.worker = TrainWorker(
+            self.calibrationClassifier,
+            self.trainFile.getFileName(),
+            self.testFile.getFileName(),
+            self.trainFlatFile.getFileName(),
+            self.testFlatFile.getFileName(),
+            -1,
+        )
+        # self.worker.resultSignal.connect(
+        #     lambda result: self.resultLabel.setText(result)
+        # )
+        # self.worker.finishSignal.connect(
+        #     lambda: self.setFig(
+        #         QPixmap(
+        #             self.calibrationClassifier.confusionMatrix(
+        #                 config["Store_Path"]["plot_path"]
+        #             )
+        #         )
+        #     )
+        # )
+        self.worker.finishSignal.connect(lambda: self.disableBtns(False))
+        self.worker.finishSignal.connect(self.worker.deleteLater)
+        self.worker.finishSignal.connect(self.thread.quit)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.work)
+        self.thread.start()
+
     def disableBtns(self, state):
-        self.runBtn.setDisabled(state)
+        self.trainBtn.setDisabled(state)
+        self.trainAllBtn.setDisabled(state)
 
     def setFig(self, fileName: str):
         self.resultFig.setPixmap(QPixmap(fileName).scaled(400, 400, Qt.KeepAspectRatio))
@@ -140,18 +178,29 @@ class TrainWorker(QObject):
         self.mode = mode
 
     def work(self):
-        self.calibrationClassifier.setFile(
-            self.trainFileName,
-            self.testFileName,
-            self.trainFlatFileName,
-            self.testFlatFileName,
-        )
-        result = self.calibrationClassifier.train(self.mode)
-        self.resultSignal.emit(
-            "Train features: {}, Test festures: {}, Train acc: {}, Test acc: {}".format(
-                *result
+        if self.mode == -1:
+            self.calibrationClassifier.setFile(
+                self.trainFileName,
+                self.testFileName,
+                self.trainFlatFileName,
+                self.testFlatFileName,
             )
-        )
+            self.calibrationClassifier.trainAll(
+                config["Store_Path"]["trainResult_path"]
+            )
+        else:
+            self.calibrationClassifier.setFile(
+                self.trainFileName,
+                self.testFileName,
+                self.trainFlatFileName,
+                self.testFlatFileName,
+            )
+            result = self.calibrationClassifier.train(self.mode)
+            self.resultSignal.emit(
+                "Train features: {}, Test festures: {}, Train acc: {}, Test acc: {}".format(
+                    *result
+                )
+            )
         self.finishSignal.emit()
 
 
@@ -248,6 +297,212 @@ class CollectWorker(QObject):
                 start = time.time()
             stop = self.dataCollector.collectData(ges)
         self.dataCollector.stopCollect()
+        self.finishSignal.emit()
+
+
+class PlotPage(QWidget):
+    def __init__(self, plotter: Plotter):
+        super().__init__()
+        self.plotter = plotter
+        self.layout = QVBoxLayout()
+        self.tab = QTabWidget()
+        self.tab.addTab(FeatureImportancePage(self.plotter), "Feature importance")
+        self.tab.addTab(SelectedFeaturePage(self.plotter), "Selected Feature")
+        self.tab.addTab(FoldingPointPage(self.plotter), "Folding Point Improvement")
+        self.layout.addWidget(self.tab)
+        self.setLayout(self.layout)
+
+
+class FeatureImportancePage(QWidget):
+    def __init__(self, plotter: Plotter):
+        super().__init__()
+        self.plotter = plotter
+        self.file = FileSelector(
+            "File: ", "Select file", config["Store_Path"]["excel_path"]
+        )
+        self.plotBtn = QPushButton("Plot")
+        self.plotBtn.clicked.connect(self.plot)
+        self.resultLabel = QLabel()
+        self.resultLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.resultFig = QLabel()
+        self.layout = QGridLayout(self)
+        self.layout.addWidget(self.file, 0, 0, 1, 4)
+        self.layout.addWidget(self.plotBtn, 1, 3, 1, 1)
+        self.layout.addWidget(self.resultLabel, 2, 0, 1, 2)
+        self.layout.addWidget(self.resultFig, 2, 2, 2, 1)
+        self.setLayout(self.layout)
+
+    def plot(self):
+        self.disableBtns(True)
+        self.thread = QThread()
+        self.worker = PlotterWorker(
+            self.plotter, self.file.getFileName(), "FeatureImportance"
+        )
+        self.worker.resultSignal.connect(
+            lambda result: self.resultLabel.setText(result)
+        )
+        self.worker.finishSignal.connect(
+            lambda: self.setFig(
+                QPixmap(
+                    self.plotter.plotFeatureImportance(
+                        config["Store_Path"]["plot_path"]
+                    )
+                )
+            )
+        )
+        self.worker.finishSignal.connect(lambda: self.disableBtns(False))
+        self.worker.finishSignal.connect(self.worker.deleteLater)
+        self.worker.finishSignal.connect(self.thread.quit)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.work)
+        self.thread.start()
+
+    def disableBtns(self, state):
+        self.plotBtn.setDisabled(state)
+
+    def setFig(self, fileName: str):
+        self.resultFig.setPixmap(QPixmap(fileName).scaled(400, 400, Qt.KeepAspectRatio))
+
+
+class SelectedFeaturePage(QWidget):
+    def __init__(self, plotter: Plotter):
+        super().__init__()
+        self.plotter = plotter
+        self.file = FileSelector(
+            "File: ", "Select file", config["Store_Path"]["excel_path"]
+        )
+        self.plotBtn = QPushButton("Plot")
+        self.plotBtn.clicked.connect(self.plot)
+        self.resultLabel = QLabel()
+        self.resultLabel.setWordWrap(True)
+        self.resultLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.resultFig1 = QLabel()
+        self.resultFig2 = QLabel()
+        self.layout = QGridLayout(self)
+        self.layout.addWidget(self.file, 0, 0, 1, 4)
+        self.layout.addWidget(self.plotBtn, 1, 3, 1, 1)
+        self.layout.addWidget(self.resultLabel, 2, 0, 1, 2)
+        self.layout.addWidget(self.resultFig1, 3, 0, 2, 1)
+        self.layout.addWidget(self.resultFig2, 3, 1, 2, 1)
+        self.setLayout(self.layout)
+
+    def plot(self):
+        self.disableBtns(True)
+        self.thread = QThread()
+        self.worker = PlotterWorker(
+            self.plotter, self.file.getFileName(), "SelectedFeature"
+        )
+        self.worker.resultSignal.connect(
+            lambda result: self.resultLabel.setText(result)
+        )
+        self.worker.finishSignal.connect(self.setFig)
+        self.worker.finishSignal.connect(lambda: self.disableBtns(False))
+        self.worker.finishSignal.connect(self.worker.deleteLater)
+        self.worker.finishSignal.connect(self.thread.quit)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.work)
+        self.thread.start()
+
+    def disableBtns(self, state):
+        self.plotBtn.setDisabled(state)
+
+    def setFig(self):
+        figPath = self.plotter.plotSelectedFeatures(config["Store_Path"]["plot_path"])
+        self.resultFig1.setPixmap(
+            QPixmap(figPath[0]).scaled(400, 400, Qt.KeepAspectRatio)
+        )
+        self.resultFig2.setPixmap(
+            QPixmap(figPath[1]).scaled(400, 400, Qt.KeepAspectRatio)
+        )
+
+
+class FoldingPointPage(QWidget):
+    def __init__(self, plotter: Plotter):
+        super().__init__()
+        self.plotter = plotter
+        self.file = FileSelector(
+            "File: ", "Select file", config["Store_Path"]["excel_path"]
+        )
+        self.plotBtn = QPushButton("Plot")
+        self.plotBtn.clicked.connect(self.plot)
+        self.resultLabel = QLabel()
+        self.resultLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.resultFig = QLabel()
+        self.layout = QGridLayout(self)
+        self.layout.addWidget(self.file, 0, 0, 1, 4)
+        self.layout.addWidget(self.plotBtn, 1, 3, 1, 1)
+        self.layout.addWidget(self.resultLabel, 2, 0, 1, 2)
+        self.layout.addWidget(self.resultFig, 2, 2, 2, 1)
+        self.setLayout(self.layout)
+
+    def plot(self):
+        self.disableBtns(True)
+        self.thread = QThread()
+        self.worker = PlotterWorker(
+            self.plotter, self.file.getFileName(), "FoldingPoint"
+        )
+        self.worker.resultSignal.connect(
+            lambda result: self.resultLabel.setText(result)
+        )
+        self.worker.finishSignal.connect(
+            lambda: self.setFig(
+                QPixmap(
+                    self.plotter.plotFoldingPoint(config["Store_Path"]["plot_path"])
+                )
+            )
+        )
+        self.worker.finishSignal.connect(lambda: self.disableBtns(False))
+        self.worker.finishSignal.connect(self.worker.deleteLater)
+        self.worker.finishSignal.connect(self.thread.quit)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.work)
+        self.thread.start()
+
+    def disableBtns(self, state):
+        self.plotBtn.setDisabled(state)
+
+    def setFig(self, fileName: str):
+        self.resultFig.setPixmap(QPixmap(fileName).scaled(400, 400, Qt.KeepAspectRatio))
+
+
+class PlotterWorker(QObject):
+    finishSignal = pyqtSignal()
+    resultSignal = pyqtSignal(str)
+
+    def __init__(self, plotter: Plotter, fileName: list[str], mode: str):
+        super().__init__()
+        self.plotter = plotter
+        self.fileName = fileName
+        self.mode = mode
+
+    def work(self):
+        if self.mode == "FeatureImportance":
+            result = self.plotter.calculateFeatureImportance(self.fileName)
+            self.resultSignal.emit(
+                "Train features: {}, Test festures: {}, Train acc: {}, Test acc: {}".format(
+                    *result
+                )
+            )
+        elif self.mode == "SelectedFeature":
+            result = self.plotter.calculateSelectedFeatures(self.fileName)
+            self.resultSignal.emit(
+                "Train features: {}, Test festures: {}\nTest acc: {}".format(*result)
+            )
+        elif self.mode == "FoldingPoint":
+            result = self.plotter.calculateFoldingPoint(self.fileName)
+            self.resultSignal.emit(
+                "BaseLine: {}, Point-level majority vote: {}, Group-level majority vote: {}".format(
+                    *result
+                )
+            )
+        elif self.mode == "Calibration":
+            result = self.plotter.calculcateCalibration(*self.fileName)
+            self.resultSignal.emit(
+                "Cross-wear: {}, Cross-band: {}, Cross-user: {}".format(*result)
+            )
         self.finishSignal.emit()
 
 

@@ -282,27 +282,7 @@ def orderCheck(ek: list[tuple[int, int]]) -> list[tuple[int, int]]:
 def splitGroup(
     data: pd.DataFrame, ekLists: list[list[tuple[int, int]]]
 ) -> tuple[list[list[int]], list[int]]:
-    # features = []
-    # label = []
-    # pending = []
-    # for i in range(0, len(ekLists[0]), 4):
-    #     timeStart = ekLists[0][i][1]
-    #     pending = []
-    #     for j in range(4):
-    #         for k in range(len(ekLists)):
-    #             pending += [
-    #                 ekLists[k][i + j][1] - timeStart,
-    #                 data[str(k)][ekLists[k][i + j][1] // 10],
-    #             ]
-    #     features.append(pending)
-    #     label.append(
-    #         data["gesture"][(features[-1][len(ekLists) * 2] + timeStart) // 10]
-    #     )
-    # return features, label
     expected = 0
-    features = []
-    label = []
-    pending = []
     groups = []
     labelPoints = []
     for s in range(len(ekLists)):
@@ -335,34 +315,6 @@ def splitGroup(
             if t1 and t2 and data["gesture"][labelPoints[i] // 10] != -1:
                 count += 1
                 break
-    # print(count)
-
-    # for i in range(len(ekLists[0])):
-    #     if (
-    #         ekLists[0][i][0] == expected
-    #         and ekLists[1][i][0] == expected
-    #         and ekLists[2][i][0] == expected
-    #     ):
-    #         if expected == 0:
-    #             timeStart = ekLists[0][i][1]
-    #         pending += [
-    #             ekLists[0][i][1] - timeStart,
-    #             data["0"][ekLists[0][i][1] // 10],
-    #             ekLists[1][i][1] - timeStart,
-    #             data["1"][ekLists[1][i][1] // 10],
-    #             ekLists[2][i][1] - timeStart,
-    #             data["2"][ekLists[2][i][1] // 10],
-    #         ]
-    #         if expected == 3:
-    #             features.append(pending[1:])
-    #             label.append(data["gesture"][(features[-1][5] + timeStart) // 10])
-    #             pending = []
-    #             expected = 0
-    #         else:
-    #             expected = expected + 1
-    #     else:
-    #         pending = []
-    #         expected = 0
     return count
 
 
@@ -400,8 +352,6 @@ def EKProcessing(
 def fullFileProcessing(
     allData: list[pd.DataFrame], nSensors: int
 ) -> tuple[list[list[float]], list[int]]:
-    allFeatures = []
-    allLabel = []
     ekGroupParameters = (
         [
             EKGroupParameter(
@@ -443,10 +393,6 @@ def fullFileProcessing(
     allCount = 0
     for data in allData:
         count, _ = EKProcessing(data, nSensors, ekGroupParameters)
-        # for i, group in enumerate(features):
-        #     if label[i] != -1:
-        #         allFeatures.append(group)
-        #         allLabel.append(label[i])
         allCount += count
     return allCount
 

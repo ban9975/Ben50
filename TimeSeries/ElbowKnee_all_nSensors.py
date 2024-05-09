@@ -40,6 +40,46 @@ class EKGroupParameter:
         self.convexDec = convexDec
 
 
+offlineEKGroupParameters = (
+    [
+        EKGroupParameter(
+            91,
+            2,
+            EKParameter(1, 250, 10, 1),
+            EKParameter(1, 300, 5, 2),
+            EKParameter(1, 300, 10, 3),
+            EKParameter(1, 150, 4, 6),
+        ),
+        EKGroupParameter(
+            41,
+            1,
+            EKParameter(1, 180, 10, 1),
+            EKParameter(1, 150, 6, 2),
+            EKParameter(1, 210, 7, 2),
+            EKParameter(1, 150, 6, 2),
+        ),
+        EKGroupParameter(
+            41,
+            1,
+            EKParameter(1, 180, 9, 1),
+            EKParameter(1, 150, 6, 2),
+            EKParameter(1, 140, 7, 2),
+            EKParameter(1, 180, 5, 3),
+        ),
+        EKGroupParameter(
+            41,
+            1,
+            EKParameter(1, 180, 10, 1),
+            EKParameter(1, 150, 6, 2),
+            EKParameter(1, 210, 7, 4),
+            EKParameter(1, 180, 6, 3),
+        ),
+    ],
+    70,
+    70,
+)
+
+
 def smooth(y, window_length, polyorder):
     y_smooth = savgol_filter(y, window_length=window_length, polyorder=polyorder)
     return y_smooth
@@ -329,46 +369,9 @@ def fullFileProcessing(
 ) -> tuple[list[list[float]], list[int]]:
     allFeatures = []
     allLabel = []
-    ekGroupParameters = (
-        [
-            EKGroupParameter(
-                91,
-                2,
-                EKParameter(1, 250, 10, 1),
-                EKParameter(1, 300, 5, 2),
-                EKParameter(1, 300, 10, 3),
-                EKParameter(1, 150, 4, 6),
-            ),
-            EKGroupParameter(
-                41,
-                1,
-                EKParameter(1, 180, 10, 1),
-                EKParameter(1, 150, 6, 2),
-                EKParameter(1, 210, 7, 2),
-                EKParameter(1, 150, 6, 2),
-            ),
-            EKGroupParameter(
-                41,
-                1,
-                EKParameter(1, 180, 9, 1),
-                EKParameter(1, 150, 6, 2),
-                EKParameter(1, 140, 7, 2),
-                EKParameter(1, 180, 5, 3),
-            ),
-            EKGroupParameter(
-                41,
-                1,
-                EKParameter(1, 180, 10, 1),
-                EKParameter(1, 150, 6, 2),
-                EKParameter(1, 210, 7, 4),
-                EKParameter(1, 180, 6, 3),
-            ),
-        ],
-        70,
-        70,
-    )
+
     for data in allData:
-        features, label, _ = EKProcessing(data, nSensors, ekGroupParameters)
+        features, label, _ = EKProcessing(data, nSensors, offlineEKGroupParameters)
         for i, group in enumerate(features):
             if label[i] != -1:
                 allFeatures.append(group)

@@ -8,3 +8,4 @@ nSensors = 3
 gestures = ["down", "up", "open", "little finger"]
 calibrationModes = ["no", "flat", "greenpoint", "maxmin"]
 testSplit = 0.7
+foldingPointGroundTruth = 120

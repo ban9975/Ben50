@@ -22,7 +22,7 @@ if __name__ == "__main__":
         ("all", 0, 24),
         ("green_red", 0, 12),
         ("red_blue", 6, 18),
-        ("blue_yellow", 18, 24),
+        ("blue_yellow", 12, 24),
         ("green", 0, 6),
         ("red", 6, 12),
         ("blue", 12, 18),

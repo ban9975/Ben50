@@ -12,7 +12,7 @@ from CalibrationCompare import *
 
 if __name__ == "__main__":
     trainFileName = "band2_0115"
-    trainFile, _ = loadRawDataFile(trainFileName)
+    trainFile, _ = loadRawDataFile(getDefaultFilePath(trainFileName))
     # testFileName = "band2_0126"
     # testFile, _ = loadRawDataFile(testFileName)
     trainFile, testFile = fullFileDataPartition(trainFile, 0.6)
