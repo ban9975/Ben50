@@ -128,18 +128,6 @@ class TrainPage(QWidget):
             self.testFlatFile.getFileName(),
             -1,
         )
-        # self.worker.resultSignal.connect(
-        #     lambda result: self.resultLabel.setText(result)
-        # )
-        # self.worker.finishSignal.connect(
-        #     lambda: self.setFig(
-        #         QPixmap(
-        #             self.calibrationClassifier.confusionMatrix(
-        #                 config["Store_Path"]["plot_path"]
-        #             )
-        #         )
-        #     )
-        # )
         self.worker.finishSignal.connect(lambda: self.disableBtns(False))
         self.worker.finishSignal.connect(self.worker.deleteLater)
         self.worker.finishSignal.connect(self.thread.quit)
