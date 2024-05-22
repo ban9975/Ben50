@@ -33,11 +33,17 @@ void loop() {
           cTime = millis();
           for(int k = 0; k < nSensor; ++k) {
             adc[k] = ads.readADC(k);
+            // Serial.println(adc[k]);
             BTPrint(adc[k]);
           }
         }
       }
       BTPrint(2048);
+      BTPrint(2048);
+      BTPrint(2048);
+      BTPrint(2048);
+      BTPrint(2048);
+      Serial.println(2048);
     }
   }
 }

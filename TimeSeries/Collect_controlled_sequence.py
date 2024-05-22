@@ -11,10 +11,10 @@ import os
 
 gestures = ["down", "up", "open", "little"]
 title = ["gesture", "0", "1", "2", "3"]
-nSensor = 4
+nSensor = 3
 bt = BTController()
-# bt.do_connect("COM12")
-bt.do_connect("/dev/cu.H-C-2010-06-01")
+bt.do_connect("COM23")
+# bt.do_connect("/dev/cu.H-C-2010-06-01")
 fileName = os.path.join(
     os.getcwd(), "Excel_data/v8/Time_series", f'{input("File name: ")}.xlsx'
 )

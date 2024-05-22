@@ -46,15 +46,18 @@ class BTController:
             rv = self.ser.read(2)
             rv = int.from_bytes(rv, byteorder="big", signed=False)
             return rv
+    
+    def reset(self):
+        self.ser.reset_input_buffer()
 
 
 gestures = ["down", "up", "open", "little"]
 title = ["gesture", "0", "1", "2", "3"]
 nSensor = 3
 bt = BTController()
-# bt.do_connect("COM12")
+bt.do_connect("COM27")
 # bt.do_connect("/dev/cu.H-C-2010-06-01")
-bt.do_connect("/dev/cu.hc05")
+# bt.do_connect("/dev/cu.hc05")
 fileName = os.path.join(os.getcwd(), f'{input("File name: ")}.xlsx')
 if not os.path.exists(fileName):
     workbook = Workbook()
@@ -110,6 +113,7 @@ while True:
         row += 1
         val = float(bt.read())
     print("stop")
+    bt.reset()
     if "Sheet" in workbook.sheetnames:
         workbook.remove(workbook["Sheet"])
     workbook.save(fileName)

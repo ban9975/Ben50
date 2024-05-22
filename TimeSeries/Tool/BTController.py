@@ -46,3 +46,6 @@ class BTController:
             rv = self.ser.read(2)
             rv = int.from_bytes(rv, byteorder="big", signed=False)
             return rv
+
+    def reset(self):
+        self.ser.reset_input_buffer()

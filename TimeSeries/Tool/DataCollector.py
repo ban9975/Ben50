@@ -56,6 +56,7 @@ class DataCollector:
         return False
 
     def stopCollect(self):
+        self.bt.reset()
         if "Sheet" in self.workbook.sheetnames:
             self.workbook.remove(self.workbook["Sheet"])
         self.workbook.save(self.fileName)
@@ -65,13 +66,13 @@ class DataCollector:
         xls = pd.ExcelFile(self.fileName)
         data = xls.parse(self.sheetName)
         plt.figure()
-        plt.ylim(500, 3200)
+        plt.ylim(500, 3700)
         plt.title(f"{self.fileName} {self.sheetName}")
         for col in data.columns:
             if col == "gesture":
                 plt.plot(
                     [i * 10 for i in range(len(data[col]))],
-                    [i * 50 + 3000 for i in data[col]],
+                    [i * 50 + 3500 for i in data[col]],
                     label="gesture",
                 )
                 continue
