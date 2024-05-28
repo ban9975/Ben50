@@ -39,6 +39,7 @@ while True:
         for s in seq:
             gestureList.append(int(s))
     t = str(len(gestureList) * 4 + 2)
+    bt.reset()
     bt.write(t)
     section = 1
     ges = -1  # neutral

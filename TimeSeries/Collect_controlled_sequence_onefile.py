@@ -55,7 +55,7 @@ gestures = ["down", "up", "open", "little"]
 title = ["gesture", "0", "1", "2", "3"]
 nSensor = 3
 bt = BTController()
-bt.do_connect("COM27")
+bt.do_connect("COM12")
 # bt.do_connect("/dev/cu.H-C-2010-06-01")
 # bt.do_connect("/dev/cu.hc05")
 fileName = os.path.join(os.getcwd(), f'{input("File name: ")}.xlsx')
@@ -80,12 +80,14 @@ while True:
         for s in seq:
             gestureList.append(int(s))
     t = str(len(gestureList) * 4 + 2)
+    bt.reset()
     bt.write(t)
     section = 1
     ges = -1  # neutral
     j = 0
     print("neutral")
     val = float(bt.read())
+    print(val)
     start = time.time()
     while val != 2048:
         # print(time.time(), start)
@@ -113,7 +115,6 @@ while True:
         row += 1
         val = float(bt.read())
     print("stop")
-    bt.reset()
     if "Sheet" in workbook.sheetnames:
         workbook.remove(workbook["Sheet"])
     workbook.save(fileName)

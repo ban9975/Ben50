@@ -31,6 +31,7 @@ class DataCollector:
             self.worksheet.cell(row=1, column=i + 1, value=title[i])
         self.row = 2
         timeLen = str(len(sequence) * iteration * 4 + 2)
+        self.bt.reset()
         self.bt.write(timeLen)
         self.currentValue = float(self.bt.read())
         return self.currentValue == 2048
@@ -56,7 +57,6 @@ class DataCollector:
         return False
 
     def stopCollect(self):
-        self.bt.reset()
         if "Sheet" in self.workbook.sheetnames:
             self.workbook.remove(self.workbook["Sheet"])
         self.workbook.save(self.fileName)
