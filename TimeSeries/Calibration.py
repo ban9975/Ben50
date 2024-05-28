@@ -14,7 +14,7 @@ def calibrationPartition(
     for i, sheetName in enumerate(sheetNames):
         test = pd.DataFrame()
         calibration = pd.DataFrame()
-        if "12" in sheetName or "01" in sheetName:
+        if ("12" in sheetName or "01" in sheetName) and "012" not in sheetName:
             test, calibration = dataPartition(fullData[i], testSplit)
         else:
             calibration, test = dataPartition(fullData[i], 1 - testSplit)
@@ -71,47 +71,50 @@ def greenpointNormalization(
     return features
 
 
+def findMaxMin(allData: list[pd.DataFrame]) -> list[tuple[float, float]]:
+    maxx = [0, 0, 0]
+    minn = [9999, 9999, 9999]
+    for data in allData:
+        tmpMax = data.max()
+        tmpMin = data.min()
+        for i in range(3):
+            maxx[i] = max(maxx[i], tmpMax[str(i)])
+            minn[i] = min(minn[i], tmpMin[str(i)])
+    return list(zip(maxx, minn))
+
+
+def findLinearTransform(
+    maxmin1: list[tuple[float, float]], maxmin2: list[tuple[float, float]]
+) -> list[tuple[float, float]]:  # find the transform to shift maxmin2 to maxmin1
+    linearTransform = []
+    for i in range(3):
+        a = (maxmin1[i][0] - maxmin1[i][1]) / (
+            maxmin2[i][0] - maxmin2[i][1]
+        )  # y = ax + b
+        b = (maxmin2[i][0] * maxmin1[i][1] - maxmin2[i][1] * maxmin1[i][0]) / (
+            maxmin2[i][0] - maxmin2[i][1]
+        )
+        linearTransform.append((a, b))
+    return linearTransform
+
+
+def transformData(
+    allData: list[pd.DataFrame], transformParameter: list[tuple[float, float]]
+) -> list[pd.DataFrame]:
+    for data in allData:
+        for i in range(3):
+            data[str(i)] = data[str(i)].map(
+                lambda value: transformParameter[i][0] * value
+                + transformParameter[i][1]
+            )
+    return allData
+
+
 def maxminNormalization(
     trainFile: list[pd.DataFrame],
     testFile: list[pd.DataFrame],
     calibrationFile: list[pd.DataFrame],
 ) -> list[pd.DataFrame]:
-    def findMaxMin(allData: list[pd.DataFrame]) -> list[tuple[float, float]]:
-        maxx = [0, 0, 0]
-        minn = [9999, 9999, 9999]
-        for data in allData:
-            tmpMax = data.max()
-            tmpMin = data.min()
-            for i in range(3):
-                maxx[i] = max(maxx[i], tmpMax[str(i)])
-                minn[i] = min(minn[i], tmpMin[str(i)])
-        return list(zip(maxx, minn))
-
-    def findLinearTransform(
-        maxmin1: list[tuple[float, float]], maxmin2: list[tuple[float, float]]
-    ) -> list[tuple[float, float]]:  # find the transform to shift maxmin2 to maxmin1
-        linearTransform = []
-        for i in range(3):
-            a = (maxmin1[i][0] - maxmin1[i][1]) / (
-                maxmin2[i][0] - maxmin2[i][1]
-            )  # y = ax + b
-            b = (maxmin2[i][0] * maxmin1[i][1] - maxmin2[i][1] * maxmin1[i][0]) / (
-                maxmin2[i][0] - maxmin2[i][1]
-            )
-            linearTransform.append((a, b))
-        return linearTransform
-
-    def transformData(
-        allData: list[pd.DataFrame], transformParameter: list[tuple[float, float]]
-    ) -> list[pd.DataFrame]:
-        for data in allData:
-            for i in range(3):
-                data[str(i)] = data[str(i)].map(
-                    lambda value: transformParameter[i][0] * value
-                    + transformParameter[i][1]
-                )
-        return allData
-
     linearTransform = findLinearTransform(
         findMaxMin(trainFile), findMaxMin(calibrationFile)
     )

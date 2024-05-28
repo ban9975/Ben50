@@ -22,7 +22,6 @@ class FileSelector(QWidget):
     def selectFile(self):
         dialog = QFileDialog(self)
         dialog.setDirectory(os.path.expanduser(self.defaultPath))
-        print(dialog.directory().absolutePath())
         dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
         dialog.setViewMode(QFileDialog.ViewMode.List)
         if dialog.exec():

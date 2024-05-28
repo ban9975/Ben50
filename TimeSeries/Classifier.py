@@ -81,9 +81,12 @@ class Classifier:
     def loadModel(self, path: str):
         self.model = joblib.load(os.path.join(os.getcwd(), "Model", path))
 
-    def confusionMatrix(self, expected, actual, title="", path=""):
+    def confusionMatrix(self, expected, actual, title="", path="", labels=[]):
         test_matrix = confusion_matrix(expected, actual)
-        disp = ConfusionMatrixDisplay(test_matrix)
+        if labels != []:
+            disp = ConfusionMatrixDisplay(test_matrix, display_labels=labels)
+        else:
+            disp = ConfusionMatrixDisplay(test_matrix)
         disp.plot()
         plt.title(title)
         if path != "":

@@ -7,16 +7,34 @@ sys.path.append(parent_dir)
 from DataParser import *
 from Classifier import *
 from ElbowKnee_all_nSensors import *
+from Calibration import *
 
 if __name__ == "__main__":
     trainFileName = "band2_0115"
-    trainFile, _ = loadRawDataFile(getDefaultFilePath(trainFileName))
+    trainFile, sheetNames = loadRawDataFile(getDefaultFilePath(trainFileName))
+    trainFile, _ = calibrationPartition(
+        sheetNames,
+        trainFile,
+        0.6,
+    )
     trainFeatures, trainLabel = fullFileProcessing(trainFile, 3)
     trainFeatures = [[f[7], f[9], f[11]] for f in trainFeatures]
     print("train: ", trainFileName, len(trainFeatures))
-    testFileNames = ["band2_0126", "band1_0126", "band4_0127"]
+    testFileNames = ["band2_0115", "band2_0126", "band1_0126", "band4_0128"]
     for testFileName in testFileNames:
-        testFile, _ = loadRawDataFile(getDefaultFilePath(testFileName))
+        tmpFile, sheetNames = loadRawDataFile(getDefaultFilePath(testFileName))
+        _, tmpFile = calibrationPartition(
+            sheetNames,
+            tmpFile,
+            0.6,
+            0.4,
+            ["00", "11", "22", "01", "12", "02"],
+        )
+        testFile, _ = calibrationPartition(
+            sheetNames,
+            tmpFile,
+            0.5,
+        )
         testFeatures, testLabel = fullFileProcessing(testFile, 3)
         testFeatures = [[f[7], f[9], f[11]] for f in testFeatures]
         classifier = Classifier()
@@ -25,16 +43,6 @@ if __name__ == "__main__":
             trainLabel,
             testFeatures,
             testLabel,
-        )
-        classifier.confusionMatrix(
-            classifier.expected_test,
-            classifier.actual_test,
-            f"{testFileName}_preliminary",
-            os.path.join(
-                os.getcwd(),
-                "../Sensys 2024",
-                f"{testFileName}_preliminary.png",
-            ),
         )
         print("test: ", testFileName, len(testFeatures))
         print(acc, accTest)

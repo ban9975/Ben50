@@ -2,7 +2,8 @@ import pandas as pd
 import os
 import openpyxl
 
-gestureDict = {"down": 0, "up": 1, "open": 2}
+gestureDict = {"down": 0, "up": 1, "open": 2, "little finger": 3}
+gestureReverseDict = {0: "down", 1: "up", 2: "open", 3: "little finger"}
 
 
 def getDefaultFilePath(fileName: str):

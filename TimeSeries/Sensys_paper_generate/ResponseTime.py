@@ -85,7 +85,7 @@ for j in range(3):
         label=f"open_{j}",
         color=colors[6 + j],
     )
-plt.title("Response time")
+# plt.title("Response time")
 plt.ylabel("resistance(ohm)")
 plt.xlabel("time(ms)")
 # plt.legend(loc="upper right")
@@ -97,12 +97,4 @@ plt.savefig(
         f"{fileName}_response_time.png",
     )
 )
-# for i in range(len(ekLists)):
-#     plot(file[0], i, ekLists[i][:4])
-# features, label, ekLists = EKProcessing(file[1], 3, offlineEKGroupParameters)
-# for i in range(len(ekLists)):
-#     plot(file[0], i, ekLists[i][:4])
-# features, label, ekLists = EKProcessing(file[2], 3, offlineEKGroupParameters)
-# for i in range(len(ekLists)):
-#     plot(file[0], i, ekLists[i][:4])
 plt.show()
