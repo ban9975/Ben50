@@ -21,7 +21,7 @@ class BTController:
 
     def connect(self, port):
         try:
-            self.ser = serial.Serial(port, 38400, timeout=2)
+            self.ser = serial.Serial(port, 9600, timeout=2)
             print("connect success")
             print(port)
             self.write("0")
@@ -55,7 +55,7 @@ gestures = ["down", "up", "open", "little"]
 title = ["gesture", "0", "1", "2", "3"]
 nSensor = 3
 bt = BTController()
-bt.do_connect("COM12")
+bt.do_connect("COM19")
 # bt.do_connect("/dev/cu.H-C-2010-06-01")
 # bt.do_connect("/dev/cu.hc05")
 fileName = os.path.join(os.getcwd(), f'{input("File name: ")}.xlsx')

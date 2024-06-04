@@ -21,7 +21,7 @@ class BTController:
 
     def connect(self, port):
         try:
-            self.ser = serial.Serial(port, 38400, timeout=2)
+            self.ser = serial.Serial(port, 9600, timeout=2)
             print("connect success")
             print(port)
             self.write("0")

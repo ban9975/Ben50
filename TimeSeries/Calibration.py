@@ -14,7 +14,7 @@ def calibrationPartition(
     for i, sheetName in enumerate(sheetNames):
         test = pd.DataFrame()
         calibration = pd.DataFrame()
-        if ("12" in sheetName or "01" in sheetName) and "012" not in sheetName:
+        if ("12_" in sheetName or "01_" in sheetName) and "012_" not in sheetName:
             test, calibration = dataPartition(fullData[i], testSplit)
         else:
             calibration, test = dataPartition(fullData[i], 1 - testSplit)

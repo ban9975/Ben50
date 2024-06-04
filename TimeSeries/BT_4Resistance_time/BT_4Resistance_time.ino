@@ -10,7 +10,7 @@ const int nSensor=3;
 int32_t btRead = 0;
 int16_t adc[4];
 void setup() {
-  BTSerial.begin(38400);
+  BTSerial.begin(9600);
   Serial.begin(9600);
   ads.begin();
   
