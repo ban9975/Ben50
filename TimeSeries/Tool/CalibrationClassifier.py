@@ -23,15 +23,6 @@ class CalibrationClassifier:
         self.trainFlatFileName = trainFlatFileName
         self.testFlatFileName = testFlatFileName
 
-    # def setFile(
-    #     self,
-
-    # ):
-    #     self.trainFileName = trainFileName
-    #     self.testFileName = testFileName
-    #     self.trainFlatFileName = trainFlatFileName
-    #     self.testFlatFileName = testFlatFileName
-
     def train(
         self,
         mode: str,
@@ -47,6 +38,12 @@ class CalibrationClassifier:
             testFile, _ = calibrationPartition(sheetNames, tmpFile, 0.7)
             trainFeatures, trainLabel = fullFileProcessing(trainFile, nSensors)
             testFeatures, testLabel = fullFileProcessing(testFile, nSensors)
+        elif self.mode == "preliminary":
+            testFile, _ = calibrationPartition(sheetNames, tmpFile, 0.7)
+            trainFeatures, trainLabel = fullFileProcessing(trainFile, nSensors)
+            trainFeatures = [[f[7], f[9], f[11]] for f in trainFeatures]
+            testFeatures, testLabel = fullFileProcessing(testFile, nSensors)
+            testFeatures = [[f[7], f[9], f[11]] for f in testFeatures]
         elif self.mode == "maxmin":
             testFile, calibrationFile = calibrationPartition(
                 sheetNames, tmpFile, 0.7, maxminSplit[0], maxminSplit[1]

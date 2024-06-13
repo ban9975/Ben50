@@ -109,6 +109,31 @@ class PostProcessor:
         plt.close()
         return figName
 
+    def preliminary(
+        self,
+        trainFileName: str,
+        testFileName: str,
+        resultFile: str,
+    ):
+        resultFile = os.path.expanduser(resultFile)
+        if not os.path.exists(resultFile):
+            workbook = Workbook()
+            sheet = workbook.worksheets[0]
+            sheet.append(["training data", "testing data", "Testing accuracy"])
+            workbook.save(resultFile)
+            workbook.close()
+        workbook = load_workbook(resultFile)
+        sheet = workbook.worksheets[0]
+        sheet.append([trainFileName, testFileName])
+        calibrationClassifier = CalibrationClassifier(trainFileName, testFileName)
+        row = sheet.max_row
+        col = 3
+        result = calibrationClassifier.train("preliminary")
+        sheet.cell(row, col, result[3])
+        workbook.save(resultFile)
+        col += 1
+        workbook.close()
+
     def beforeCalibration(
         self,
         trainFileName: str,
@@ -118,7 +143,6 @@ class PostProcessor:
         resultFile = os.path.expanduser(resultFile)
         if not os.path.exists(resultFile):
             workbook = Workbook()
-            workbook.create_sheet("Result")
             sheet = workbook.worksheets[0]
             sheet.append(["training data", "testing data", "Testing accuracy"])
             workbook.save(resultFile)
@@ -147,7 +171,6 @@ class PostProcessor:
         resultFile = os.path.expanduser(resultFile)
         if not os.path.exists(resultFile):
             workbook = Workbook()
-            workbook.create_sheet("Result")
             sheet = workbook.worksheets[0]
             sheet.append(
                 [
@@ -203,7 +226,6 @@ class PostProcessor:
         resultFile = os.path.expanduser(resultFile)
         if not os.path.exists(resultFile):
             workbook = Workbook()
-            workbook.create_sheet("Result")
             sheet = workbook.worksheets[0]
             sheet.append(
                 [

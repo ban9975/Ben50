@@ -244,6 +244,7 @@ class PostProcessPage(QWidget):
         self.layout = QVBoxLayout()
         self.tab = QTabWidget()
         self.tab.addTab(ExtractionRatePage(), "Extraction rate")
+        self.tab.addTab(PreliminaryPage(), "Preliminary")
         self.tab.addTab(BeforeCalibrationPage(), "Before calibration")
         self.tab.addTab(AfterCalibrationPage(), "After calibration")
         self.tab.addTab(CalibrationEffortPage(), "Calibration Effort")
@@ -300,6 +301,54 @@ class ExtractionRatePage(QWidget):
     def setFig(self, fileName: str):
         print(fileName)
         self.resultFig.setPixmap(QPixmap(fileName).scaled(400, 400, Qt.KeepAspectRatio))
+
+
+class PreliminaryPage(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.trainFile = FileSelector(
+            "Train data path: ", "Select train data", config["Store_Path"]["excel_path"]
+        )
+        self.testFile = FileSelector(
+            "Test data path: ", "Select test data", config["Store_Path"]["excel_path"]
+        )
+        self.runBtn = QPushButton("Run")
+        self.runBtn.clicked.connect(self.run)
+        self.resultLabel = QLabel()
+        self.resultLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.layout = QGridLayout(self)
+        self.layout.addWidget(self.trainFile, 0, 0, 1, 4)
+        self.layout.addWidget(self.testFile, 1, 0, 1, 4)
+        self.layout.addWidget(self.runBtn, 2, 3, 1, 1)
+        self.layout.addWidget(self.resultLabel, 3, 0, 1, 2)
+        self.setLayout(self.layout)
+
+    def run(self):
+        self.disableBtns(True)
+        self.resultLabel.setText("")
+        self.thread = QThread()
+        self.postProcessor = PostProcessor()
+        self.worker = PostProcessWorker(
+            self.postProcessor,
+            "Preliminary",
+            [
+                self.trainFile.getFileName(),
+                self.testFile.getFileName(),
+            ],
+        )
+        self.worker.resultSignal.connect(
+            lambda result: self.resultLabel.setText(result)
+        )
+        self.worker.finishSignal.connect(lambda: self.disableBtns(False))
+        self.worker.finishSignal.connect(self.worker.deleteLater)
+        self.worker.finishSignal.connect(self.thread.quit)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.work)
+        self.thread.start()
+
+    def disableBtns(self, state):
+        self.runBtn.setDisabled(state)
 
 
 class BeforeCalibrationPage(QWidget):
@@ -474,11 +523,15 @@ class PostProcessWorker(QObject):
         if self.mode == "ExtractionRate":
             result = self.postProcessor.calculateExtractionRate(self.fileNames[0])
             self.resultSignal.emit(
-                "BaseLine: {}, Point-level majority vote: {}, Group-level majority vote: {}".format(
+                "BaseLine: {}\nPoint-level majority vote: {}\nGroup-level majority vote: {}".format(
                     *result
                 )
             )
-            print(result)
+        elif self.mode == "Preliminary":
+            self.postProcessor.preliminary(
+                *self.fileNames, config["Store_Path"]["preliminary_path"]
+            )
+            self.resultSignal.emit("Finished")
         elif self.mode == "BeforeCalibration":
             self.postProcessor.beforeCalibration(
                 *self.fileNames, config["Store_Path"]["beforeCalibration_path"]
